@@ -1,15 +1,28 @@
-// backend/index.js
 require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
+const cors = require("cors"); 
 const { Pool } = require("pg");
-const path = require("path");
+const path = require("path"); 
 
 const app = express();
-app.use(cors());
+
+const allowedOrigins = ['https://inovacode.up.railway.app'];
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(null, true); 
+        }
+    },
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+    optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// Configuração do Postgres
 const pool = new Pool({
   host: process.env.PGHOST,
   user: process.env.PGUSER,
@@ -18,12 +31,12 @@ const pool = new Pool({
   port: process.env.PGPORT ? Number(process.env.PGPORT) : 5432,
 });
 
-// === ROTAS DA API ===
+// === ROTAS DA API === (sem alteração)
 app.get("/api", (req, res) => {
   res.send("🚀 Novo servidor rodando!");
 });
 
-// Rota para leads
+// Rota para leads (sem alteração)
 app.post("/api/leads", async (req, res) => {
   try {
     const { name, email, message } = req.body;
@@ -41,7 +54,6 @@ app.post("/api/leads", async (req, res) => {
   }
 });
 
-// 🚀 Rota para salvar quiz
 app.post("/api/quiz", async (req, res) => {
   try {
     const { user_email, score, total, answers } = req.body;
@@ -71,14 +83,10 @@ app.post("/api/quiz", async (req, res) => {
   }
 });
 
-// === FRONTEND (arquivos estáticos) ===
-app.use(express.static(path.join(__dirname, "../frontend")));
-
-// === FALLBACK (corrigido para Express novo) ===
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+  res.status(404).send("404: Endpoint da API não encontrado.");
 });
 
-// Start
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
