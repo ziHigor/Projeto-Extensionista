@@ -2105,7 +2105,7 @@ updateDisplay();
                 const message = document.getElementById('message').value;
 
                 try {
-                    const res = await fetch('http://localhost:4000/api/leads', {
+                    const res = await fetch('backend-production-f0759.up.railway.app', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ name, email, message })
@@ -2342,7 +2342,7 @@ updateDisplay();
 
             async function salvarResultadoQuiz(user_email, score, total, answers) {
                 try {
-                    const res = await fetch("http://localhost:4000/api/quiz", {
+                    const res = await fetch("backend-production-f0759.up.railway.app", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ user_email, score, total, answers })
