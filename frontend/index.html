@@ -1,0 +1,2474 @@
+<!-- TESTE NOVO 25/09 -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InovaCode Sistemas - Transformação Digital</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --neon-green: #00ff9d;
+            --cyber-blue: #00d9ff;
+            --matrix-green: #00ff41;
+            --dark-bg: #0a0a0a;
+            --dark-card: #181818;
+            --light-text: #f0f0f0;
+            --accent-purple: #bd00ff;
+            --accent-orange: #ff7700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(106, 194, 197, 0.18) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 217, 255, 0.18) 0%, transparent 20%),
+                linear-gradient(180deg, rgba(30, 40, 50, 0.18) 0%, rgba(10, 10, 10, 0.85) 100%);
+        }
+
+        .matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -2;
+            opacity: 0.22;
+        }
+
+        header {
+            background-color: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0.8rem 1.5rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--neon-green);
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-img {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.6);
+            transition: all .3s ease;
+        }
+
+        .logo-img:hover {
+            transform: rotate(5deg) scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 255, 157, 0.8);
+        }
+
+        .logo-text {
+            font-size: 1.15rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--neon-green), var(--cyber-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1rem;
+        }
+
+        nav ul li a {
+            color: var(--light-text);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 8px 12px;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        nav ul li a:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--neon-green);
+            transition: width .25s ease;
+        }
+
+        nav ul li a:hover:before {
+            width: 100%;
+        }
+
+        nav ul li a:hover {
+            color: var(--neon-green);
+            text-shadow: 0 0 8px rgba(0, 255, 157, 0.6);
+        }
+
+        .hamburger {
+            display: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .hamburger i {
+            font-size: 1.2rem;
+            color: var(--neon-green);
+        }
+
+        .mobile-nav {
+            display: none;
+            position: absolute;
+            top: 72px;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.98);
+            border-top: 1px solid rgba(0, 255, 157, 0.06);
+            padding: 1rem;
+            z-index: 1001;
+        }
+
+        .mobile-nav ul {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            align-items: center;
+        }
+
+        .mobile-nav a {
+            display: block;
+            padding: 0.8rem 1.2rem;
+            width: 90%;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .hero {
+            min-height: 92vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 2rem;
+            margin-top: 80px;
+            position: relative;
+            background: linear-gradient(120deg, rgba(0, 255, 157, 0.08) 0%, rgba(0, 217, 255, 0.08) 100%);
+            box-shadow: 0 8px 48px rgba(0, 255, 157, 0.10);
+        }
+
+        .hero-inner {
+            max-width: 1100px;
+            width: 100%;
+            padding: 4.5rem 2.5rem 3.5rem 2.5rem;
+            border-radius: 28px;
+            background: linear-gradient(135deg, rgba(18, 18, 18, 0.85) 70%, rgba(0, 255, 157, 0.08) 100%);
+            border: 2px solid rgba(0, 255, 157, 0.12);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 60px rgba(0, 255, 157, 0.18), 0 0 120px rgba(0, 217, 255, 0.10);
+            position: relative;
+            animation: heroFadeIn 1.2s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        @keyframes heroFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .hero-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 22px;
+            margin-bottom: 28px;
+        }
+
+        .hero-logo img {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 24px;
+            border: 4px solid rgba(0, 255, 157, 0.18);
+            box-shadow: 0 0 60px rgba(0, 255, 157, 0.18), 0 0 120px rgba(0, 217, 255, 0.10);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.12));
+            transition: transform .3s, box-shadow .3s;
+        }
+
+        .hero-logo img:hover {
+            transform: scale(1.06) rotate(-2deg);
+            box-shadow: 0 0 80px rgba(0, 255, 157, 0.28), 0 0 160px rgba(0, 217, 255, 0.18);
+        }
+
+        .hero-main-title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, var(--neon-green), var(--cyber-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 32px rgba(0, 255, 157, 0.22);
+            margin-bottom: 12px;
+            animation: heroTitleGlow 2.5s infinite alternate;
+        }
+
+        @keyframes heroTitleGlow {
+            0% {
+                text-shadow: 0 0 32px rgba(0, 255, 157, 0.22);
+            }
+
+            100% {
+                text-shadow: 0 0 48px rgba(0, 217, 255, 0.32);
+            }
+        }
+
+        .typing {
+            display: inline-block;
+            padding-right: 8px;
+            font-family: 'Fira Mono', 'Courier New', monospace;
+            font-size: 2.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .hero-shortcuts {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        .shortcut {
+            padding: 14px 22px;
+            background: linear-gradient(90deg, rgba(0, 255, 157, 0.12), rgba(0, 217, 255, 0.10));
+            border: 2px solid rgba(0, 255, 157, 0.18);
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 1.08rem;
+            color: #fff;
+            transition: all .22s cubic-bezier(.4, 0, .2, 1);
+            box-shadow: 0 2px 18px rgba(0, 255, 157, 0.08);
+            outline: none;
+            text-decoration: none !important;
+        }
+
+        .shortcut:hover,
+        .shortcut:focus {
+            background: linear-gradient(90deg, var(--neon-green), var(--cyber-blue));
+            color: #041014;
+            border-color: var(--neon-green);
+            box-shadow: 0 4px 24px rgba(0, 255, 157, 0.18);
+            transform: scale(1.07);
+        }
+
+        section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .section-title h2 {
+            font-size: 2.8rem;
+            display: inline-block;
+            background: linear-gradient(45deg, var(--neon-green), var(--cyber-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            padding-bottom: 15px;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: var(--neon-green);
+            box-shadow: 0 0 15px var(--neon-green);
+            border-radius: 2px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 4rem;
+        }
+
+        /* Cards hex-card para sobre/importancia */
+        #sobre .section-title h2,
+        #importancia .section-title h2 {
+            font-size: 2.6rem;
+            background: linear-gradient(90deg, var(--cyber-blue), var(--neon-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 18px rgba(0, 255, 157, 0.18);
+            margin-bottom: 0.5rem;
+        }
+
+        #sobre .hex-card,
+        #importancia .hex-card {
+            background: linear-gradient(120deg, #181818 70%, #00d9ff 100%);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0, 255, 157, 0.12);
+            padding: 2.5rem 2rem;
+            border: 2px solid var(--cyber-blue);
+            transition: box-shadow .3s, transform .3s;
+            position: relative;
+            overflow: hidden;
+            max-width: 420px;
+            margin-left: auto;
+        }
+
+        #sobre .hex-card:hover,
+        #importancia .hex-card:hover {
+            box-shadow: 0 16px 48px rgba(0, 255, 157, 0.22);
+            transform: scale(1.03);
+            border-color: var(--neon-green);
+        }
+
+        #sobre .hex-icon,
+        #importancia .hex-icon {
+            font-size: 3rem;
+            color: var(--cyber-blue);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 18px var(--cyber-blue);
+        }
+
+        #sobre .hex-card h3,
+        #importancia .hex-card h3 {
+            color: var(--neon-green);
+            margin-bottom: 1.2rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        #sobre .hex-card p,
+        #importancia .hex-card p {
+            color: #fff;
+            font-size: 1.08rem;
+            line-height: 1.7;
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 700px) {
+
+            #sobre .section-title h2,
+            #importancia .section-title h2 {
+                font-size: 1.5rem;
+            }
+
+            #sobre .hex-card,
+            #importancia .hex-card {
+                max-width: 100%;
+                margin-left: 0;
+                padding: 1.2rem 0.5rem;
+                border-radius: 12px;
+            }
+
+            #sobre .hex-icon,
+            #importancia .hex-icon {
+                font-size: 2rem;
+            }
+
+            #sobre .hex-card h3,
+            #importancia .hex-card h3 {
+                font-size: 1.1rem;
+            }
+
+            #sobre .hex-card p,
+            #importancia .hex-card p {
+                font-size: 0.98rem;
+            }
+        }
+
+        /* Cards mulheres */
+        #mulheres .hex-card {
+            background: linear-gradient(120deg, #181818 70%, #00d9ff 100%);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0, 255, 157, 0.12);
+            padding: 2.5rem 2rem;
+            border: 2px solid var(--cyber-blue);
+            transition: box-shadow .3s, transform .3s;
+            position: relative;
+            overflow: hidden;
+            max-width: 420px;
+            margin-left: auto;
+        }
+
+        #mulheres .hex-card:hover {
+            box-shadow: 0 16px 48px rgba(0, 255, 157, 0.22);
+            transform: scale(1.03);
+            border-color: var(--neon-green);
+        }
+
+        #mulheres .hex-icon {
+            font-size: 3rem;
+            color: var(--cyber-blue);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 18px var(--cyber-blue);
+        }
+
+        #mulheres .hex-card h3 {
+            color: var(--neon-green);
+            margin-bottom: 1.2rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        #mulheres .hex-card p {
+            color: #fff;
+            font-size: 1.08rem;
+            line-height: 1.7;
+            margin-bottom: 0;
+        }
+
+        /* Cards mulheres */
+        .people-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .person-card {
+            background: #181818;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0, 255, 157, 0.12);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            min-height: 220px;
+            transition: box-shadow .3s, transform .3s;
+            border: 4px solid var(--neon-green);
+        }
+
+        .person-card:hover {
+            box-shadow: 0 16px 48px rgba(0, 255, 157, 0.22);
+            transform: scale(1.03);
+        }
+
+        .person-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--neon-green);
+            box-shadow: 0 4px 18px rgba(0, 255, 157, 0.18);
+            background: #10181f;
+            display: block;
+            margin: 0 auto;
+            z-index: 1;
+        }
+
+        .person-info {
+            background: transparent;
+            padding: 0.5rem;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.08rem;
+            flex: 1;
+            z-index: 1;
+        }
+
+        .person-info strong {
+            color: var(--neon-green);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        @media (max-width: 700px) {
+            .person-card {
+                flex-direction: column;
+                align-items: flex-start;
+                min-height: unset;
+                gap: 1rem;
+            }
+
+            .person-card img {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+            }
+        }
+
+        /* Grade Curricular Profissional */
+        .grade-table {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 18px;
+            border: 2px solid var(--neon-green);
+            background: linear-gradient(120deg, #181818 70%, #00d9ff 100%);
+            box-shadow: 0 8px 32px rgba(0, 255, 157, 0.12);
+            margin-bottom: 2.5rem;
+        }
+
+        .grade-table table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: transparent;
+        }
+
+        .grade-table thead th {
+            background: linear-gradient(90deg, var(--neon-green), var(--cyber-blue));
+            color: #041014;
+            font-weight: 900;
+            font-size: 1.15rem;
+            padding: 18px 14px;
+            border-top-left-radius: 14px;
+            border-top-right-radius: 14px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 12px rgba(0, 255, 157, 0.18);
+            border-bottom: 2px solid var(--cyber-blue);
+        }
+
+        .grade-table tbody tr {
+            transition: background .2s;
+        }
+
+        .grade-table tbody tr:hover {
+            background: rgba(0, 255, 157, 0.08);
+        }
+
+        .grade-table td,
+        .grade-table th {
+            padding: 16px 14px;
+            border-bottom: 1px solid rgba(0, 255, 157, 0.08);
+            font-size: 1.05rem;
+            color: #fff;
+            vertical-align: top;
+        }
+
+        .grade-table td strong {
+            color: var(--neon-green);
+            font-weight: 800;
+            font-size: 1.08rem;
+        }
+
+        .grade-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        @media (max-width: 700px) {
+
+            .grade-table thead th,
+            .grade-table td,
+            .grade-table th {
+                font-size: 0.98rem;
+                padding: 10px 6px;
+            }
+
+            .grade-table {
+                border-radius: 10px;
+            }
+        }
+
+        /* Calculadora */
+        .cyber-calculator {
+            background-color: var(--dark-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 0 35px rgba(0, 255, 157, 0.25);
+            max-width: 1000px;
+            margin: 0 auto 6rem;
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .calc-display {
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 1.8rem;
+            font-size: 2.2rem;
+            text-align: right;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            min-height: 90px;
+            font-family: 'Courier New', monospace;
+            color: var(--neon-green);
+            text-shadow: 0 0 8px var(--neon-green);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .cyber-btn {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            padding: 1.3rem;
+            font-size: 1.4rem;
+            background: rgba(18, 18, 18, 0.8);
+            color: var(--light-text);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .2s ease;
+            font-weight: 600;
+        }
+
+        .cyber-btn:after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, var(--neon-green) 0%, var(--cyber-blue) 100%);
+            opacity: 0.25;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s cubic-bezier(.4, 0, .2, 1), height 0.3s cubic-bezier(.4, 0, .2, 1);
+            z-index: -1;
+        }
+
+        .cyber-btn:active:after {
+            width: 220%;
+            height: 220%;
+            opacity: 0.35;
+            transition: width 0.15s, height 0.15s;
+        }
+
+        .cyber-btn:active {
+            box-shadow: 0 0 24px var(--neon-green), 0 0 40px var(--accent-orange);
+            color: #041014 !important;
+            border-color: var(--accent-purple) !important;
+            transform: scale(0.97);
+        }
+
+        .cyber-btn.operator {
+            background: linear-gradient(90deg, rgba(0, 217, 255, 0.1), rgba(16, 24, 31, 0.1));
+            color: var(--cyber-blue);
+            border-color: var(--cyber-blue) !important;
+            box-shadow: 0 0 12px rgba(0, 217, 255, 0.12);
+        }
+
+        .cyber-btn.operator:active {
+            background: linear-gradient(90deg, var(--cyber-blue), #10181f);
+            color: #041014 !important;
+            border-color: var(--neon-green) !important;
+            box-shadow: 0 0 24px var(--neon-green), 0 0 40px var(--cyber-blue);
+            transform: scale(0.97);
+        }
+
+        .cyber-btn.equals {
+            background: rgba(189, 0, 255, 0.2);
+            color: var(--accent-purple);
+            grid-column: span 2;
+        }
+
+        .cyber-btn.clear {
+            background: rgba(255, 119, 0, 0.2);
+            color: var(--accent-orange);
+            grid-column: span 2;
+        }
+
+        /* Code panel */
+        .code-panel {
+            background: rgba(0, 0, 0, 0.45);
+            border-radius: 12px;
+            padding: 1rem;
+            color: var(--light-text);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 420px;
+            overflow: auto;
+            border: 1px solid rgba(0, 255, 157, 0.08);
+        }
+
+        /* Contato Empresarial Profissional */
+        .business-contact {
+            background: linear-gradient(135deg, #181818 80%);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            margin: 6rem auto;
+            box-shadow: 0 8px 32px rgba(0, 255, 157, 0.12);
+            border: 2px solid var(--neon-green);
+            max-width: 700px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-subtitle {
+            text-align: center;
+            color: var(--neon-green);
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .contact-subtitle i {
+            margin-right: 10px;
+            color: var(--cyber-blue);
+        }
+
+        .contact-form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group label {
+            color: var(--neon-green);
+            font-weight: 700;
+            font-size: 1.08rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1.1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1.5px solid rgba(0, 255, 157, 0.18);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.08rem;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 18px rgba(0, 255, 157, 0.18);
+            outline: none;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: linear-gradient(90deg, var(--neon-green), var(--cyber-blue));
+            color: #041014;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 2px 18px rgba(0, 255, 157, 0.12);
+            transition: all .18s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(90deg, var(--accent-purple), var(--cyber-blue));
+            color: #fff;
+            box-shadow: 0 4px 24px rgba(189, 0, 255, 0.18);
+            transform: scale(1.05);
+        }
+
+        /* Quiz Promo */
+        .quiz-promo {
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 50% 30%, #00ff9d 0%, #00d9ff 40%, #10181f 100%);
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: quizFullFadeIn .8s cubic-bezier(.4, 0, .2, 1);
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85) inset;
+            overflow: hidden;
+        }
+
+        @keyframes quizFullFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes quizBounce {
+            0% {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+
+            75% {
+                transform: translateY(10px);
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .quiz-promo {
+            animation: quizBounce 1s ease-out;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1200;
+            display: none;
+        }
+
+        .quiz-promo .promo-icon {
+            font-size: 5rem;
+            color: var(--accent-purple);
+            margin-bottom: 24px;
+            text-shadow: 0 0 48px #bd00ff, 0 0 24px #00d9ff;
+            animation: quizIconBounce 1.5s infinite alternate;
+        }
+
+        @keyframes quizIconBounce {
+            0% {
+                transform: scale(1) translateY(0);
+            }
+
+            100% {
+                transform: scale(1.12) translateY(-12px);
+            }
+        }
+
+        .quiz-promo .promo-text {
+            background: rgba(18, 18, 18, 0.92);
+            border-radius: 18px;
+            padding: 32px 28px;
+            box-shadow: 0 8px 48px rgba(0, 255, 157, 0.18);
+            text-align: center;
+            max-width: 480px;
+            margin-bottom: 32px;
+            border: 2px solid var(--neon-green);
+        }
+
+        .quiz-promo .promo-text .title {
+            color: var(--neon-green);
+            font-weight: 900;
+            font-size: 2rem;
+            margin-bottom: 18px;
+            text-shadow: 0 0 18px rgba(0, 255, 157, 0.22);
+            letter-spacing: 2px;
+            animation: quizTitlePulse 1.2s infinite alternate;
+        }
+
+        @keyframes quizTitlePulse {
+            0% {
+                text-shadow: 0 0 18px #00ff9d;
+            }
+
+            100% {
+                text-shadow: 0 0 32px #00d9ff;
+            }
+        }
+
+        .quiz-promo .promo-text .subtitle {
+            color: #fff;
+            font-size: 1.18rem;
+            margin-bottom: 12px;
+            text-shadow: 0 0 8px #00d9ff;
+        }
+
+        .quiz-promo .promo-cta {
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+            margin-top: 18px;
+        }
+
+        .quiz-promo .cyber-btn {
+            font-size: 1.2rem;
+            font-weight: 900;
+            border-radius: 14px;
+            padding: 16px 32px;
+            box-shadow: 0 2px 18px rgba(0, 255, 157, 0.12);
+            transition: all .18s cubic-bezier(.4, 0, .2, 1);
+            border: none;
+        }
+
+        .quiz-promo .cyber-btn:first-child {
+            background: linear-gradient(90deg, var(--neon-green), var(--cyber-blue));
+            color: #041014;
+            animation: quizBtnGlow 1.2s infinite alternate;
+        }
+
+        @keyframes quizBtnGlow {
+            0% {
+                box-shadow: 0 0 24px #00ff9d;
+            }
+
+            100% {
+                box-shadow: 0 0 48px #00d9ff;
+            }
+        }
+
+        .quiz-promo .cyber-btn:last-child {
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-orange));
+            color: #fff;
+        }
+
+        .quiz-promo .cyber-btn:hover {
+            transform: scale(1.08);
+            filter: brightness(1.15);
+        }
+
+        /* Quiz Page Profissional */
+        .quiz-page {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1300;
+            background: linear-gradient(120deg, #181818 80%, #00d9ff 100%);
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .quiz-page[style*="display: block"] {
+            display: flex !important;
+        }
+
+        .quiz-card {
+            background: #181818;
+            border-radius: 22px;
+            box-shadow: 0 12px 48px rgba(0, 255, 157, 0.18), 0 0 80px rgba(0, 217, 255, 0.10);
+            border: 2px solid var(--cyber-blue);
+            padding: 2.8rem 2.2rem;
+            max-width: 420px;
+            width: 100%;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1.5rem;
+            animation: quizCardFadeIn .7s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        @keyframes quizCardFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.96) translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .quiz-question {
+            color: var(--neon-green);
+            font-size: 1.18rem;
+            font-weight: 800;
+            margin-bottom: 1.2rem;
+            letter-spacing: 1px;
+            text-shadow: 0 0 12px rgba(0, 255, 157, 0.18);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .quiz-options button {
+            background: linear-gradient(90deg, #10181f 80%, var(--cyber-blue) 100%);
+            color: #fff;
+            border: 2px solid var(--cyber-blue);
+            border-radius: 12px;
+            font-size: 1.08rem;
+            font-weight: 700;
+            padding: 1.1rem 1rem;
+            cursor: pointer;
+            transition: all .18s cubic-bezier(.4, 0, .2, 1);
+            box-shadow: 0 2px 18px rgba(0, 255, 157, 0.08);
+            outline: none;
+        }
+
+        .quiz-options button:hover:not([disabled]) {
+            background: linear-gradient(90deg, var(--neon-green), var(--cyber-blue));
+            color: #041014;
+            border-color: var(--neon-green);
+            box-shadow: 0 4px 24px rgba(0, 255, 157, 0.18);
+            transform: scale(1.04);
+        }
+
+        .quiz-options button[data-correct="true"] {
+            background: linear-gradient(90deg, var(--neon-green), var(--cyber-blue));
+            color: #041014;
+            border-color: var(--neon-green);
+            box-shadow: 0 0 24px var(--neon-green);
+        }
+
+        .quiz-options button[data-wrong="true"] {
+            background: linear-gradient(90deg, #ff7700, #bd00ff);
+            color: #fff;
+            border-color: #ff7700;
+            box-shadow: 0 0 24px #ff7700;
+        }
+
+        .quiz-result {
+            color: var(--neon-green);
+            font-size: 1.15rem;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 1.2rem;
+            padding: 1rem;
+            border-radius: 12px;
+            background: rgba(0, 255, 157, 0.08);
+            box-shadow: 0 2px 18px rgba(0, 255, 157, 0.08);
+        }
+
+        .return-home-btn {
+            background: linear-gradient(90deg, var(--cyber-blue), var(--neon-green));
+            color: #041014;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.08rem;
+            font-weight: 800;
+            cursor: pointer;
+            padding: 1rem 2rem;
+            margin-top: 1.2rem;
+            box-shadow: 0 2px 18px rgba(0, 255, 157, 0.12);
+            transition: all .18s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .return-home-btn:hover {
+            background: linear-gradient(90deg, var(--accent-purple), var(--cyber-blue));
+            color: #fff;
+            box-shadow: 0 4px 24px rgba(189, 0, 255, 0.18);
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 700px) {
+            .quiz-card {
+                padding: 1.2rem 0.5rem;
+                border-radius: 14px;
+                max-width: 98vw;
+            }
+
+            .quiz-question {
+                font-size: 1rem;
+            }
+
+            .quiz-options button {
+                font-size: 0.98rem;
+                padding: 0.8rem 0.6rem;
+            }
+
+            .quiz-result {
+                font-size: 1rem;
+                padding: 0.7rem;
+            }
+
+            .return-home-btn {
+                font-size: 1rem;
+                padding: 0.7rem 1.2rem;
+            }
+        }
+
+        /* WhatsApp FAB */
+        .whatsapp-fab {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 1400;
+            width: 64px;
+            height: 64px;
+            border-radius: 999px;
+            background: linear-gradient(45deg, var(--neon-green), var(--cyber-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            cursor: pointer;
+            border: 2px solid rgba(0, 0, 0, 0.25);
+        }
+
+        .whatsapp-fab i {
+            font-size: 1.6rem;
+            color: #042;
+        }
+
+        /* Overlay para bloquear interações */
+        #quizOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1199;
+            background: rgba(0, 0, 0, 0.7);
+            pointer-events: auto;
+        }
+
+        body.quiz-lock {
+            overflow: hidden !important;
+        }
+
+        /* Footer */
+        footer {
+            background-color: rgba(10, 10, 10, 0.95);
+            padding: 4rem 2rem 2rem;
+            text-align: center;
+            border-top: 2px solid var(--neon-green);
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+            gap: 1.5rem;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background-color: var(--dark-card);
+            color: var(--neon-green);
+            text-decoration: none;
+            font-size: 1.8rem;
+            transition: all .3s ease;
+            border: 1px solid rgba(0, 255, 157, 0.3);
+        }
+
+        .social-links a:hover {
+            background-color: var(--neon-green);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.6);
+            transform: translateY(-5px);
+        }
+
+        .copyright {
+            color: var(--light-text);
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .quiz-page {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1300;
+            background: rgba(18, 18, 18, 0.98);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quiz-page[style*="display: block"] {
+            display: flex !important;
+        }
+
+        /* Seção de entrevistas */
+        .entrevistados {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .entrevistado-img {
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0002;
+        }
+
+        .videos-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .video-card {
+            text-align: center;
+            max-width: 350px;
+        }
+
+        .video-card video {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0002;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="quizOverlay" style="display:none;"></div>
+    <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="img/Logo.jpeg" alt="Logo InovaCode Sistemas" class="logo-img" />
+                <div class="logo-text">INOVACODE SISTEMAS</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#sobre">Sobre</a></li>
+                    <li><a href="#importancia">Importância</a></li>
+                    <li><a href="#" id="menuQuizBtn">Quiz</a></li>
+                    <li><a href="#contato">Contato</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger" id="hamburger"><i class="fas fa-bars"></i></div>
+        </div>
+        <div class="mobile-nav" id="mobileNav">
+            <ul>
+                <li><a href="#sobre">Sobre</a></li>
+                <li><a href="#importancia">Importância</a></li>
+                <li><a href="#contato">Contato</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Quiz Promo -->
+    <div class="quiz-promo" id="quizBalloon" role="dialog" aria-label="Quiz - Descubra o mundo da Tecnologia">
+        <div class="promo-icon"><i class="fas fa-bolt"></i></div>
+        <div class="promo-text">
+            <div class="title">QUIZ: TECNOLOGIA É PARA TODOS, NÃO SÓ PARA QUEM JÁ ENTENDE DO ASSUNTO!!</div>
+            <div class="subtitle">FAÇA O NOSSO QUIZ E DESCUBRA QUAL É O SEU PERFIL NO MUNDO DIGITAL.<br>QUEM SABE ESSE É
+                O PRIMEIRO PASSO PARA SUA JORNADA EM SISTEMAS DE INFORMAÇÃO!</div>
+        </div>
+        <div class="promo-cta">
+            <button id="openQuizBtn" class="cyber-btn">COMEÇAR</button>
+            <button id="deferQuizBtn" class="cyber-btn">MAIS TARDE</button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <div class="hero-inner">
+            <div class="hero-logo">
+                <img src="img/Logo.jpeg" alt="Logo InovaCode Sistemas - Central" />
+                <div class="hero-main-title"><span class="typing" id="typingText">TRANSFORME SEU FUTURO COM
+                        TECNOLOGIA</span></div>
+                <div style="max-width:820px; color: rgba(240,240,240,0.85); line-height:1.6; font-size:1.05rem;">
+                    O Bacharelado em Sistemas de Informação prepara profissionais para liderar a inovação e enfrentar os
+                    desafios da transformação digital. Explore nossa grade curricular atualizada, conheça áreas de
+                    atuação estratégicas, inspire-se com histórias de mulheres na TI, entrevistas exclusivas e recursos
+                    interativos como a calculadora e o quiz.
+                </div>
+                <div class="hero-shortcuts">
+                    <a class="shortcut" href="#mulheres">Mulheres na TI</a>
+                    <a class="shortcut" href="#grade">Grade Curricular</a>
+                    <a class="shortcut" href="#calculadora">Calculadora</a>
+                    <a class="shortcut" href="#entrevistas">Videos</a>
+                </div>
+            </div>
+    </section>
+
+    <!-- Sobre o Curso -->
+    <section id="sobre">
+        <div class="section-title">
+            <h2>O QUE É SISTEMAS DE INFORMAÇÃO?</h2>
+        </div>
+        <div class="content-grid">
+            <div class="hex-card animate">
+                <div class="hex-icon"><i class="fas fa-laptop-code"></i></div>
+                <h3>Profissão do Futuro</h3>
+                <p>Sistemas de Informação é o curso que conecta tecnologia, pessoas e negócios. Você aprende a criar
+                    soluções digitais, gerenciar dados e transformar empresas com inovação e inteligência.</p>
+            </div>
+            <div class="hex-card animate delay-1">
+                <div class="hex-icon"><i class="fas fa-network-wired"></i></div>
+                <h3>Formação Multidisciplinar</h3>
+                <p>O curso une programação, gestão, análise de dados, segurança e empreendedorismo. Você se torna capaz
+                    de atuar em equipes diversas, liderar projetos e resolver problemas reais do mercado.</p>
+            </div>
+            <div class="hex-card animate delay-2">
+                <div class="hex-icon"><i class="fas fa-lightbulb"></i></div>
+                <h3>Impacto na Sociedade</h3>
+                <p>Profissionais de Sistemas de Informação criam aplicativos, sites, sistemas e plataformas que
+                    facilitam a vida das pessoas, melhoram processos e impulsionam negócios em todos os setores.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mulheres na TI -->
+    <section id="mulheres">
+        <div class="section-title">
+            <h2>MULHERES NA TI</h2>
+        </div>
+        <div class="content-grid">
+            <div class="hex-card animate">
+                <div class="hex-icon"><i class="fas fa-female"></i></div>
+                <h3>Por que é importante?</h3>
+                <p>Promover a participação feminina em tecnologia fortalece diversidade de pensamento, inovação e
+                    resolução de problemas. Mulheres em TI trazem perspectivas variadas que aumentam a qualidade das
+                    soluções e melhoram a experiência dos usuários.</p>
+            </div>
+            <div class="hex-card animate delay-1">
+                <div class="hex-icon"><i class="fas fa-handshake"></i></div>
+                <h3>Iniciativas e Apoio</h3>
+                <p>Programas de mentoria, grupos de estudo, bolsas e eventos específicos são formas eficientes de atrair
+                    e reter mulheres no curso e no mercado de trabalho. Empresas e universidades podem criar ambientes
+                    mais acolhedores e com políticas de equidade.</p>
+            </div>
+            <div class="hex-card animate delay-2">
+                <div class="hex-icon"><i class="fas fa-rocket"></i></div>
+                <h3>Oportunidades</h3>
+                <p>As áreas de desenvolvimento, segurança, dados e gestão oferecem excelentes oportunidades. Incentivar
+                    estágios, projetos colaborativos e participação em hackathons ajuda na inserção profissional.</p>
+            </div>
+        </div>
+        <!-- Galeria de Mulheres Inspiradoras -->
+        <div style="max-width:1200px; margin:1rem auto;">
+            <div style="color: rgba(240,240,240,0.9); margin-bottom:12px;"><strong>Galeria:</strong> exemplos de
+                criadoras de conteúdo e profissionais inspiradoras.</div>
+            <div class="people-gallery">
+                <div class="person-card">
+                    <img src="img/letcode.jpeg" alt="Letti">
+                    <div class="person-info">
+                        <strong>@lletcode - Letícia Baldin</strong>
+                        <h3>Lifestyle tech</h3>
+                        <span>Criadora de conteúdos digitais com linguagem leve, divertida e profissional.</span>
+                    </div>
+                </div>
+                <div class="person-card">
+                    <img src="img/ketlyn.jpeg" alt="Ketlyn">
+                    <div class="person-info">
+                        <strong>@ketlyncode - Ketlyn Laury</strong>
+                        <h3>Estudante de BSI</h3>
+                        <span>Usa o instagram para falar de tecnologia de forma simples, real e inspiradora.</span>
+                    </div>
+                </div>
+                <div class="person-card">
+                    <img src="img/benniCode.jpeg" alt="Benni">
+                    <div class="person-info">
+                        <strong>@bennicode - Brena Paiva</strong>
+                        <h3>Desenvolvedora Full-Stack</h3>
+                        <span>Criadora de conteúdo em programação, carreira e vida acadêmica de forma leve e
+                            acessível.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Importância da TI -->
+    <section id="importancia">
+        <div class="section-title">
+            <h2>A IMPORTÂNCIA DA TECNOLOGIA</h2>
+        </div>
+        <div class="content-grid">
+            <div class="hex-card animate">
+                <div class="hex-icon"><i class="fas fa-brain"></i></div>
+                <h3>Inteligência Artificial</h3>
+                <p>A IA está revolucionando setores inteiros, desde diagnósticos médicos até personalização de
+                    experiências digitais. Profissionais de BSI estão na vanguarda desta transformação.</p>
+            </div>
+            <div class="hex-card animate delay-1">
+                <div class="hex-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Segurança Digital</h3>
+                <p>Com a crescente digitalização, a proteção de dados e sistemas tornou-se crítica. Especialistas em
+                    segurança da informação são essenciais para empresas de todos os portes.</p>
+            </div>
+            <div class="hex-card animate delay-2">
+                <div class="hex-icon"><i class="fas fa-cloud"></i></div>
+                <h3>Computação em Nuvem</h3>
+                <p>A migração para ambientes cloud permite escalabilidade, flexibilidade e redução de custos.
+                    Profissionais capacitados em arquiteturas cloud são altamente valorizados.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Grade Curricular -->
+    <section id="grade">
+        <div class="section-title">
+            <h2>GRADE CURRICULAR - SISTEMAS DE INFORMAÇÃO (Atualizada)</h2>
+        </div>
+        <div class="grade-table">
+            <table id="gradeTable">
+                <thead>
+                    <tr>
+                        <th>Período</th>
+                        <th>Disciplinas / Carga horária</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1º Período – 2024/1</strong></td>
+                        <td>
+                            <span class="disciplina"
+                                data-desc="Atividades práticas e projetos de extensão para integração com a comunidade.">Atividades
+                                Extensionistas I – 100h</span>;
+                            <span class="disciplina"
+                                data-desc="Introdução ao cálculo diferencial e integral, funções e aplicações.">Cálculo
+                                Diferencial e Integral – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Lógica básica, algoritmos e primeiros passos em programação.">Introdução à
+                                Lógica de Programação – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Conceitos de hardware, componentes e funcionamento dos computadores.">Introdução
+                                e Organização de Computadores – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Raciocínio lógico, proposições, tabelas verdade e aplicações matemáticas.">Lógica
+                                Matemática – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Desenvolvimento da comunicação escrita e interpretação de textos técnicos.">Português
+                                Instrumental – 60h</span>.
+                            Subtotal: 400h
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>2º Período – 2024/2</strong></td>
+                        <td>
+                            <span class="disciplina"
+                                data-desc="Funcionamento interno dos computadores, arquitetura e componentes.">Arquitetura
+                                e Organização de Computadores – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Continuação das atividades práticas e projetos de extensão.">Atividades
+                                Extensionistas II – 100h</span>;
+                            <span class="disciplina"
+                                data-desc="Conceitos de empreendedorismo, inovação e gestão de negócios.">Empreendedorismo
+                                e Gestão da Inovação e Competitividade – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Estudo da interação entre pessoas e sistemas computacionais.">Interface
+                                Homem-Máquina – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Aprendizado de uma linguagem de programação estruturada.">Linguagem de
+                                Programação – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Métodos científicos, pesquisa e elaboração de trabalhos acadêmicos.">Metodologia
+                                Científica – 60h</span>.
+                            Subtotal: 400h
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>3º Período – 2025/1</strong></td>
+                        <td>
+                            <span class="disciplina"
+                                data-desc="Vetores, matrizes, sistemas lineares e aplicações em computação.">Álgebra
+                                Linear – 60h</span>;
+                            <span class="disciplina" data-desc="Atividades práticas e projetos de extensão.">Atividades
+                                Extensionistas III – 100h</span>;
+                            <span class="disciplina"
+                                data-desc="Estruturas de dados como listas, pilhas, filas e árvores.">Estrutura de Dados
+                                – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Programação orientada a objetos: classes, herança, polimorfismo.">Programação
+                                Orientada a Objetos – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Funcionamento e gerenciamento de sistemas operacionais.">Sistemas
+                                Operacionais – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Conceitos de sistemas, modelagem e análise sistêmica.">Teoria Geral de
+                                Sistemas – 60h</span>.
+                            Subtotal: 400h
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>4º Período – 2025/2</strong></td>
+                        <td>
+                            <span class="disciplina" data-desc="Atividades práticas e projetos de extensão.">Atividades
+                                Extensionistas IV – 100h</span>;
+                            <span class="disciplina"
+                                data-desc="Modelagem, criação e manipulação de bancos de dados relacionais.">Introdução
+                                a Banco de Dados – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Fundamentos de redes de computadores e comunicação de dados.">Introdução a
+                                Redes de Computadores – 60h</span>;
+                            <span class="disciplina" data-desc="Aprofundamento em linguagens de programação.">Linguagem
+                                de Programação Avançada – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Estudo de linguagens formais, gramáticas e autômatos.">Linguagens Formais e
+                                Autômatos – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Probabilidade, estatística descritiva e inferencial.">Probabilidade e
+                                Estatística – 60h</span>.
+                            Subtotal: 400h
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>5º Período</strong></td>
+                        <td>
+                            <span class="disciplina"
+                                data-desc="Análise, modelagem e documentação de sistemas de informação.">Análise e
+                                Projeto de Sistemas – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Desenvolvimento de aplicações web e tecnologias associadas.">Aplicações e
+                                Desenvolvimento Web – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Tópicos avançados em bancos de dados, como transações e segurança.">Banco de
+                                Dados Avançado – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Métodos e técnicas para otimização de processos.">Pesquisa Operacional –
+                                60h</span>;
+                            <span class="disciplina"
+                                data-desc="Vivência prática supervisionada em projetos de TI.">Práticas Supervisionadas
+                                em TI – 100h</span>;
+                            <span class="disciplina" data-desc="Configuração, administração e segurança de redes.">Redes
+                                de Computadores – 60h</span>.
+                            Subtotal: 400h
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>6º Período</strong></td>
+                        <td>
+                            <span class="disciplina"
+                                data-desc="Atividades extracurriculares para complementação da formação.">Atividades
+                                Complementares I – 100h</span>;
+                            <span class="disciplina"
+                                data-desc="Processos, métodos e ferramentas para desenvolvimento de software.">Engenharia
+                                de Software – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Modelagem conceitual, lógica e física de dados.">Modelagem de Dados –
+                                60h</span>;
+                            <span class="disciplina"
+                                data-desc="Disciplina optativa para aprofundamento em temas específicos.">Optativa I –
+                                60h</span>;
+                            <span class="disciplina"
+                                data-desc="Princípios e práticas de segurança da informação.">Segurança em Informática –
+                                60h</span>;
+                            <span class="disciplina"
+                                data-desc="Arquiteturas e comunicação em sistemas distribuídos.">Sistemas Distribuídos –
+                                60h</span>.
+                            Subtotal: 400h
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>7º Período</strong></td>
+                        <td>
+                            <span class="disciplina"
+                                data-desc="Gestão de projetos de TI, metodologias e ferramentas.">Gerência de Projetos –
+                                60h</span>;
+                            <span class="disciplina"
+                                data-desc="Fundamentos e aplicações de inteligência artificial.">Inteligência Artificial
+                                – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Disciplina optativa para aprofundamento em temas específicos.">Optativa II –
+                                60h</span>;
+                            <span class="disciplina"
+                                data-desc="Planejamento estratégico de sistemas de informação nas organizações.">Planejamento
+                                Estratégico de Sistemas de Informação – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Orientação e desenvolvimento do Trabalho de Conclusão de Curso.">Práticas
+                                Orientadas de TCC – 160h</span>.
+                            Subtotal: 400h
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>8º Período</strong></td>
+                        <td>
+                            <span class="disciplina"
+                                data-desc="Atividades extracurriculares para complementação da formação.">Atividades
+                                Complementares II – 100h</span>;
+                            <span class="disciplina"
+                                data-desc="Aspectos éticos e legais relacionados à tecnologia da informação.">Ética e
+                                Legislação em TI – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Estudo de tópicos avançados em sistemas de informação.">Tópicos Avançados em
+                                Sistemas de Informação – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Estudo de tópicos avançados em telecomunicações.">Tópicos Avançados em
+                                Telecomunicações – 60h</span>;
+                            <span class="disciplina"
+                                data-desc="Desenvolvimento e apresentação do Trabalho de Curso.">Trabalho de Curso –
+                                120h</span>.
+                            Subtotal: 400h
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top:18px; color: rgba(240,240,240,0.85);">Carga horária final do curso: 1º ao 8º período =
+            400h cada. Carga horária total = 3.200 horas.</div>
+    </section>
+
+    <!-- MODAL DE DESCRIÇÃO DE DISCIPLINA -->
+    <div id="disciplinaModal"
+        style="display:none;position:fixed;z-index:2100;inset:0;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;">
+        <div
+            style="background:#181818;border-radius:18px;max-width:90vw;min-width:260px;padding:2rem;box-shadow:0 0 40px #00ff9d;border:2px solid #00ff9d;position:relative;">
+            <button id="closeDisciplinaModal"
+                style="position:absolute;top:10px;right:10px;background:var(--accent-purple);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;font-size:1.1rem;">X</button>
+            <div id="disciplinaModalContent" style="color:#fff;font-size:1.1rem;"></div>
+        </div>
+    </div>
+
+    <!-- Calculadora + Código Fonte ao lado -->
+    <section id="calculadora">
+        <div class="section-title">
+            <h2>CALCULADORA INTERATIVA + CÓDIGO FONTE</h2>
+        </div>
+        <div class="cyber-calculator">
+            <div class="calc-panel">
+                <div class="calc-display" id="display">0</div>
+                <div class="calc-buttons">
+                    <button class="cyber-btn" data-value="7">7</button>
+                    <button class="cyber-btn" data-value="8">8</button>
+                    <button class="cyber-btn" data-value="9">9</button>
+                    <button class="cyber-btn operator" data-value="/">/</button>
+                    <button class="cyber-btn" data-value="4">4</button>
+                    <button class="cyber-btn" data-value="5">5</button>
+                    <button class="cyber-btn" data-value="6">6</button>
+                    <button class="cyber-btn operator" data-value="*">×</button>
+                    <button class="cyber-btn" data-value="1">1</button>
+                    <button class="cyber-btn" data-value="2">2</button>
+                    <button class="cyber-btn" data-value="3">3</button>
+                    <button class="cyber-btn operator" data-value="-">-</button>
+                    <button class="cyber-btn" data-value="0">0</button>
+                    <button class="cyber-btn" data-value=".">.</button>
+                    <button class="cyber-btn equals" id="equalsBtn">=</button>
+                    <button class="cyber-btn operator" data-value="+">+</button>
+                    <button class="cyber-btn clear" id="clearBtn">C</button>
+                </div>
+            </div>
+            <div class="code-panel">
+                <strong style="color:var(--neon-green);">Código fonte da Calculadora (JS)</strong>
+                <pre
+                    style="white-space:pre-wrap; margin-top:8px; background:#181818; color:#fff; border-radius:10px; padding:1rem; font-size:1rem; border:1px solid #00ff9d;">
+<span style="color:#00ff9d">// Calculadora Interativa - JavaScript</span>
+
+<span style="color:#00d9ff">let displayValue = '0';</span> <span style="color:#bd00ff">// Valor exibido no visor</span>
+
+<span style="color:#bd00ff">// Atualiza o visor da calculadora</span>
+<span style="color:#00ff9d">function</span> updateDisplay() {
+    document.getElementById('display').innerText = displayValue;
+}
+
+<span style="color:#bd00ff">// Adiciona número ou operador ao visor</span>
+<span style="color:#00ff9d">function</span> appendToDisplay(value) {
+    <span style="color:#00d9ff">const operators = '+-*/';</span>
+    <span style="color:#00d9ff">const lastChar = displayValue.slice(-1);</span>
+
+    <span style="color:#bd00ff">// Corrige botão de multiplicação visual</span>
+    <span style="color:#00ff9d">if</span> (value === '×') value = '*';
+
+    <span style="color:#bd00ff">// Evita operadores duplicados</span>
+    <span style="color:#00ff9d">if</span> (operators.includes(value) && operators.includes(lastChar)) {
+        displayValue = displayValue.slice(0, -1) + value;
+        updateDisplay();
+        <span style="color:#00ff9d">return</span>;
+    }
+    <span style="color:#bd00ff">// Evita múltiplos pontos decimais</span>
+    <span style="color:#00ff9d">if</span> (value === '.' && /\.\d*$/.test(displayValue)) <span style="color:#00ff9d">return</span>;
+
+    <span style="color:#bd00ff">// Substitui zero inicial (exceto ponto)</span>
+    <span style="color:#00ff9d">if</span> (displayValue === '0' && value !== '.') {
+        displayValue = value;
+    } else {
+        displayValue += value;
+    }
+    updateDisplay();
+}
+
+<span style="color:#bd00ff">// Limpa o visor</span>
+<span style="color:#00ff9d">function</span> clearDisplay() {
+    displayValue = '0';
+    updateDisplay();
+}
+
+<span style="color:#bd00ff">// Realiza o cálculo da expressão</span>
+<span style="color:#00ff9d">function</span> calculate() {
+    <span style="color:#00ff9d">try</span> {
+        <span style="color:#bd00ff">// Permite apenas números, operadores e parênteses</span>
+        <span style="color:#00ff9d">if</span> (/^[0-9+\-*/(). ]+$/.test(displayValue)) {
+            <span style="color:#bd00ff">// Avaliação segura</span>
+            <span style="color:#00d9ff">const result = Function('"use strict";return (' + displayValue + ')')();</span>
+            <span style="color:#00ff9d">if</span> (Number.isFinite(result)) displayValue = String(result);
+            <span style="color:#00ff9d">else</span> displayValue = 'Erro';
+        } <span style="color:#00ff9d">else</span> {
+            displayValue = 'Erro';
+        }
+    } <span style="color:#00ff9d">catch</span> (e) {
+        displayValue = 'Erro';
+    }
+    updateDisplay();
+}
+
+updateDisplay();
+                </pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- NOVA SEÇÃO: ENTREVISTAS -->
+    <section id="entrevistas" class="section light-bg">
+        <div class="section-title">
+            <h2 class="section-title">Videos de Entrevistas/Dicas/Informações</h2>
+
+            <!-- Vídeos das entrevistas -->
+
+            <div class="videos-grid">
+                <div class="video-card">
+                    <h3>Brena Paiva - Entrevista Parte 1</h3>
+                    <video controls poster="img/benniCode.jpeg">
+                        <source src="videos/entrevista_brena_paiva_part1.mp4" type="video/mp4">
+                        Seu navegador não suporta vídeo.
+                    </video>
+                </div>
+
+                <div class="video-card">
+                    <h3>Brena Paiva - Entrevista Parte 2</h3>
+                    <video controls poster="img/benniCode.jpeg">
+                        <source src="videos/entrevista_brena_paiva_part2.mp4" type="video/mp4">
+                        Seu navegador não suporta vídeo.
+                    </video>
+                </div>
+
+                <div class="video-card">
+                    <h3>Alunos com Dicas</h3>
+                    <video controls poster="img/Higor_Kettlen_Suzane.jpg">
+                        <source src="videos/dicas1.mov" type="video/mp4">
+                        Seu navegador não suporta vídeo.
+                    </video>
+                </div>
+
+            <div class="video-card">
+                    <h3>Informação para você Mulher</h3>
+                    <video controls poster="img/Daniely_Malu.png">
+                        <source src="videos/dicas2.MP4" type="video/mp4">
+                        Seu navegador não suporta vídeo.
+                    </video>
+                </div>
+
+            <div class="video-card">
+                    <h3>Dica de Alunos de TI</h3>
+                    <video controls poster="img/Rafa.png">
+                        <source src="videos/dicas3.MP4" type="video/mp4">
+                        Seu navegador não suporta vídeo.
+                    </video>
+                </div>
+
+            <div class="video-card">
+                    <h3>Alunos com Dicas</h3>
+                    <video controls poster="img/Weverton_JP.jpg">
+                        <source src="videos/dicas4.mp4" type="video/mp4">
+                        Seu navegador não suporta vídeo.
+                    </video>
+                </div>
+
+            <div class="video-card">
+                    <h3>Alunos com Dicas</h3>
+                    <video controls poster="img/Ana.jpg">
+                        <source src="videos/dicas5.mp4" type="video/mp4">
+                        Seu navegador não suporta vídeo.
+                    </video>
+                               </div>
+        </div>
+    </section>
+
+
+    <!-- Contato Empresarial -->
+    <section id="contato">
+        <div class="section-title">
+            <h2>CONTATO EMPRESARIAL</h2>
+        </div>
+        <div class="business-contact">
+            <h3 class="contact-subtitle"><i class="fas fa-envelope-open-text"></i> Fale com nossa equipe</h3>
+            <form class="contact-form" id="businessForm">
+                <div class="form-group full-width">
+                    <label for="name">Nome</label>
+                    <input type="text" id="name" name="name" placeholder="Seu nome completo" required>
+                </div>
+                <div class="form-group full-width">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="seu@exemplo.com" required>
+                </div>
+                <div class="form-group full-width">
+                    <label for="message">Mensagem</label>
+                    <textarea id="message" name="message" placeholder="Escreva sua mensagem e o que procura..."
+                        required></textarea>
+                </div>
+                <div class="form-group full-width"
+                    style="display:flex; gap:12px; justify-content:flex-end; align-items:center;">
+                    <button type="reset" class="cyber-btn"
+                        style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.04); color:var(--light-text); padding:10px 14px;">Limpar</button>
+                    <button type="submit" class="submit-btn" style="padding:10px 16px;">Enviar</button>
+                </div>
+            </form>
+            <div id="formNotice" style="margin-top:12px; color:var(--neon-green); font-weight:700; display:none;"></div>
+        </div>
+    </section>
+
+
+    <!-- MODAL DE VÍDEO -->
+    <div id="videoModal"
+        style="display:none;position:fixed;z-index:2000;inset:0;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;">
+        <div
+            style="background:#181818;border-radius:18px;max-width:90vw;max-height:80vh;padding:1.5rem;box-shadow:0 0 40px #00ff9d;border:2px solid #00ff9d;position:relative;">
+            <button id="closeVideoModal"
+                style="position:absolute;top:10px;right:10px;background:var(--accent-purple);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;font-size:1.1rem;">X</button>
+            <div id="videoModalContent" style="width:70vw;max-width:700px;height:40vw;max-height:400px;">
+                <!-- Vídeo será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="social-links">
+                <a href="https://www.instagram.com/inovacode_sistemas?igsh=MW5lbTlwcXVnNTd0ag%3D%3D&utm_source=qr"
+                    target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
+                <a href="https://chat.whatsapp.com/BV2PNpEIN5UJoLnEe9czQE" target="_blank" rel="noopener"><i
+                        class="fab fa-whatsapp"></i></a>
+            </div>
+            <div class="copyright">
+                <p>InovaCode Sistemas &copy; <span id="currentYear"></span> - Todos os direitos reservados</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp floating button -->
+    <div class="whatsapp-fab" id="waFab" title="Fale com outras pessoas no nosso grupo do WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </div>
+
+    <!-- Quiz Page -->
+    <div class="quiz-page" id="quizPage" aria-hidden="true">
+        <div class="quiz-card" id="quizCard">
+            <div id="quizContentArea"></div>
+            <div class="quiz-result" id="quizResult"></div>
+            <div style="text-align:center; margin-top:12px;"><button id="closeQuizBtn" class="return-home-btn">Voltar
+                    para o site</button></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast" aria-hidden="true"></div>
+    <script>
+        // Atualizar ano do rodapé
+        document.getElementById('currentYear').innerText = new Date().getFullYear();
+
+        // Hamburger mobile nav
+        const hamburger = document.getElementById('hamburger');
+        const mobileNav = document.getElementById('mobileNav');
+        if (hamburger) {
+            hamburger.addEventListener('click', () => { mobileNav.style.display = mobileNav.style.display === 'block' ? 'none' : 'block'; });
+        }
+
+        // Smooth scroll for internal links
+        document.querySelectorAll('nav a, .shortcut').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (!href || !href.startsWith('#')) return;
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    const topOffset = target.offsetTop - 72;
+                    window.scrollTo({ top: topOffset, behavior: 'smooth' });
+                }
+                if (window.innerWidth <= 992) mobileNav.style.display = 'none';
+            });
+        });
+
+        // Typing effect (apenas uma vez, sem repetir)
+        (function typing() {
+            const el = document.getElementById('typingText');
+            if (!el) return;
+            const text = "TRANSFORME SEU FUTURO COM TECNOLOGIA";
+            el.innerText = '';
+            let i = 0;
+            function tick() {
+                if (i <= text.length) {
+                    el.innerText = text.slice(0, i);
+                    i++;
+                    setTimeout(tick, 28);
+                }
+            }
+            tick();
+        })();
+
+        // WhatsApp FAB (link - do grupo)
+        const waFab = document.getElementById('waFab');
+        if (waFab) waFab.addEventListener('click', () => {
+            window.open('https://chat.whatsapp.com/BV2PNpEIN5UJoLnEe9czQE', '_blank');
+        });
+
+        // INTERATIVIDADE: Grade curricular (disciplinas)
+        document.querySelectorAll('.disciplina').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.style.textDecoration = 'underline';
+            el.addEventListener('click', function (e) {
+                const desc = this.getAttribute('data-desc');
+                const modal = document.getElementById('disciplinaModal');
+                const content = document.getElementById('disciplinaModalContent');
+                if (desc && modal && content) {
+                    content.innerHTML = `<strong style="color:var(--neon-green);font-size:1.2rem;">${this.innerText}</strong><br><br>${desc}`;
+                    modal.style.display = 'flex';
+                    document.body.classList.add('quiz-lock');
+                }
+                e.stopPropagation();
+            });
+        });
+        document.getElementById('closeDisciplinaModal').onclick = function () {
+            document.getElementById('disciplinaModal').style.display = 'none';
+            document.body.classList.remove('quiz-lock');
+        };
+        window.addEventListener('click', function (e) {
+            if (e.target === document.getElementById('disciplinaModal')) {
+                document.getElementById('disciplinaModal').style.display = 'none';
+                document.body.classList.remove('quiz-lock');
+            }
+        });
+
+        // Calculadora JS
+        (function () {
+            const displayEl = document.getElementById('display');
+            const buttons = document.querySelectorAll('.cyber-btn[data-value]');
+            const equalsBtn = document.getElementById('equalsBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            let displayValue = '0';
+
+            function updateDisplay() { if (displayEl) displayEl.innerText = displayValue; }
+
+            function appendToDisplay(value) {
+                const operators = '+-*/';
+                const lastChar = displayValue.slice(-1);
+
+                if (value === '×') value = '*';
+                if (operators.includes(value) && operators.includes(lastChar)) {
+                    displayValue = displayValue.slice(0, -1) + value;
+                    updateDisplay();
+                    return;
+                }
+                if (value === '.' && /\.\d*$/.test(displayValue)) return;
+                if (displayValue === '0' && value !== '.') {
+                    displayValue = value;
+                } else {
+                    displayValue += value;
+                }
+                updateDisplay();
+            }
+
+            function clearDisplay() { displayValue = '0'; updateDisplay(); }
+
+            function calculate() {
+                try {
+                    if (/^[0-9+\-*/(). ]+$/.test(displayValue)) {
+                        const result = Function('"use strict";return (' + displayValue + ')')();
+                        if (Number.isFinite(result)) displayValue = String(result);
+                        else displayValue = 'Erro';
+                    } else {
+                        displayValue = 'Erro';
+                    }
+                } catch (e) {
+                    displayValue = 'Erro';
+                }
+                updateDisplay();
+            }
+
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const v = btn.getAttribute('data-value');
+                    appendToDisplay(v);
+                });
+            });
+            if (equalsBtn) equalsBtn.addEventListener('click', calculate);
+            if (clearBtn) clearBtn.addEventListener('click', clearDisplay);
+
+            window.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                if (e.key >= '0' && e.key <= '9') appendToDisplay(e.key);
+                if (['+', '-', '*', '/', '(', ')', '.'].includes(e.key)) appendToDisplay(e.key);
+                if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calculate(); }
+                if (e.key === 'Backspace') {
+                    if (displayValue.length > 1) displayValue = displayValue.slice(0, -1);
+                    else displayValue = '0';
+                    updateDisplay();
+                }
+            });
+
+            updateDisplay();
+        })();
+
+        // Matrix Canvas Effect
+        (function initMatrixCanvas() {
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+            const cols = Math.floor(width / 14);
+            const drops = new Array(cols).fill(1);
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            function draw() {
+                ctx.fillStyle = 'rgba(10,10,10,0.12)';
+                ctx.fillRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(0,255,157,0.8)';
+                ctx.font = '14px Courier New';
+                for (let i = 0; i < drops.length; i++) {
+                    const text = Math.floor(Math.random() * 2);
+                    const x = i * 14;
+                    const y = drops[i] * 14;
+                    ctx.fillText(String(text), x, y);
+                    if (y > height && Math.random() > 0.975) drops[i] = 0;
+
+                    drops[i]++;
+                }
+                requestAnimationFrame(draw);
+            }
+            if (window.innerWidth <= 768) { canvas.style.display = 'none'; return; }
+            draw();
+        })();
+
+        // Toast utility
+        function showToast(msg, duration = 3000) {
+            const t = document.getElementById('toast');
+            if (!t) return;
+            t.innerText = msg;
+            t.style.display = 'block';
+            t.setAttribute('aria-hidden', 'false');
+            setTimeout(() => { t.style.display = 'none'; t.setAttribute('aria-hidden', 'true'); }, duration);
+        }
+
+        // Business form submit (front-end only)
+        const businessForm = document.getElementById('businessForm');
+        if (businessForm) {
+            businessForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const message = document.getElementById('message').value;
+
+                try {
+                    const res = await fetch('http://localhost:4000/api/leads', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email, message })
+                    });
+                    if (res.ok) {
+                        alert('Contato salvo com sucesso!');
+                        businessForm.reset();
+                    } else {
+                        alert('Erro ao enviar, tente novamente.');
+                    }
+                } catch (err) {
+                    alert('Erro de conexão com servidor.');
+                }
+            });
+        }
+
+
+        // === Botão do Menu (abrir quiz pelo menu principal) ===
+        const menuQuizBtn = document.getElementById('menuQuizBtn');
+        if (menuQuizBtn) {
+            menuQuizBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const quizPromo = document.getElementById("quizBalloon");
+                const quizOverlay = document.getElementById("quizOverlay");
+                const quizPage = document.querySelector(".quiz-page");
+
+                if (quizPromo) quizPromo.style.display = "none";
+                if (quizOverlay) quizOverlay.style.display = "block";
+                if (quizPage) {
+                    quizPage.style.display = "block";
+                    // Reinicia quiz ao abrir pelo menu
+                    currentQuestion = 0;
+                    score = 0;
+                    answers = [];
+                    // Modifique a função renderQuestion aqui
+                    function renderQuestion() {
+                        const q = quizData[currentQuestion];
+                        quizPage.innerHTML = `
+                            <div class="quiz-card">
+                                <div class="quiz-question">${q.question}</div>
+                                <div class="quiz-options"></div>
+                                <div style="text-align:center; margin-top:20px;">
+                                    <button id="closeQuizBtn" class="return-home-btn">Voltar para o site</button>
+                                </div>
+                            </div>`;
+                        
+                        const opts = quizPage.querySelector(".quiz-options");
+                        q.options.forEach(opt => {
+                            const btn = document.createElement("button");
+                            btn.textContent = opt.text;
+                            btn.onclick = () => onOptionClick(q, opt);
+                            opts.appendChild(btn);
+                        });
+
+                        // Adicionar evento ao botão voltar
+                        document.getElementById("closeQuizBtn").onclick = closeQuizToSite;
+                    }
+                    renderQuestion();
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // === Quiz principal ===
+        (function () {
+            // TODAS AS PERGUNTAS DO QUIZ
+            const quizData = [
+                {
+                    question: "O que significa 'Wi-Fi'?", options: [
+                        { text: "Um tipo de café", correct: false },
+                        { text: "Uma conexão sem fio com a internet", correct: true },
+                        { text: "Um jogo online", correct: false }
+                    ]
+                },
+                {
+                    question: "Onde ficam armazenadas as fotos que você tira no celular?", options: [
+                        { text: "No bolso", correct: false },
+                        { text: "Na galeria ou na nuvem", correct: true },
+                        { text: "No carregador", correct: false }
+                    ]
+                },
+                {
+                    question: "O que é um 'sistema de informação'?", options: [
+                        { text: "Um programa de fofoca", correct: false },
+                        { text: "Um conjunto de pessoas e tecnologias que organizam dados", correct: true },
+                        { text: "Um aplicativo para pedir comida", correct: false }
+                    ]
+                },
+                {
+                    question: "Qual destes objetos NÃO é considerado tecnologia digital?", options: [
+                        { text: "Computador", correct: false },
+                        { text: "Calculadora", correct: false },
+                        { text: "Vassoura", correct: true }
+                    ]
+                },
+                {
+                    question: "Qual é a função principal do Google?", options: [
+                        { text: "Ajudar a encontrar informações", correct: true },
+                        { text: "Vender pizza", correct: false },
+                        { text: "Guardar brinquedos", correct: false }
+                    ]
+                },
+                {
+                    question: "O que significa 'app'?", options: [
+                        { text: "Um tipo de celular", correct: false },
+                        { text: "Abreviação de aplicativo", correct: true },
+                        { text: "Um desenho animado", correct: false }
+                    ]
+                },
+                {
+                    question: "Quando você envia uma mensagem no WhatsApp, o que acontece com ela?", options: [
+                        { text: "Vai direto para o espaço", correct: false },
+                        { text: "É transmitida pela internet", correct: true },
+                        { text: "Fica presa no celular", correct: false }
+                    ]
+                },
+                {
+                    question: "Qual destes é um exemplo de rede social?", options: [
+                        { text: "Facebook", correct: true },
+                        { text: "Word", correct: false },
+                        { text: "Calculadora", correct: false }
+                    ]
+                },
+                {
+                    question: "O que é 'nuvem' na tecnologia?", options: [
+                        { text: "O céu cheio de algodão", correct: false },
+                        { text: "Um lugar na internet para guardar arquivos", correct: true },
+                        { text: "Uma chuva de códigos", correct: false }
+                    ]
+                },
+                {
+                    question: "Qual destes é um sistema operacional de celular?", options: [
+                        { text: "Android", correct: true },
+                        { text: "WhatsApp", correct: false },
+                        { text: "TikTok", correct: false }
+                    ]
+                }
+            ];
+
+            let quizOverlay = document.getElementById("quizOverlay");
+            if (!quizOverlay) {
+                quizOverlay = document.createElement("div");
+                quizOverlay.id = "quizOverlay";
+                quizOverlay.style.position = "fixed";
+                quizOverlay.style.inset = "0";
+                quizOverlay.style.background = "rgba(0,0,0,0.6)";
+                quizOverlay.style.display = "none";
+                quizOverlay.style.zIndex = "1199";
+                document.body.appendChild(quizOverlay);
+            }
+
+            let quizPage = document.querySelector(".quiz-page");
+            if (!quizPage) {
+                quizPage = document.createElement("div");
+                quizPage.className = "quiz-page";
+                quizPage.style.display = "none";
+                quizPage.style.zIndex = "1200";
+                document.body.appendChild(quizPage);
+            }
+
+            const quizPromo = document.getElementById("quizBalloon");
+            const openQuizBtn = document.getElementById("openQuizBtn");
+            const deferQuizBtn = document.getElementById("deferQuizBtn");
+
+            // Variáveis globais
+            window.currentQuestion = 0;
+            window.score = 0;
+            window.answers = [];
+
+            // Função para reiniciar o quiz
+            function resetQuiz() {
+                window.currentQuestion = 0;
+                window.score = 0;
+                window.answers = [];
+                if (quizPage) quizPage.innerHTML = "";
+            }
+            window.resetQuiz = resetQuiz;
+
+            function renderQuestion() {
+                const q = quizData[window.currentQuestion];
+                quizPage.innerHTML = `
+      <div class="quiz-card">
+        <div class="quiz-question">${q.question}</div>
+        <div class="quiz-options"></div>
+      </div>`;
+                const opts = quizPage.querySelector(".quiz-options");
+                q.options.forEach(opt => {
+                    const btn = document.createElement("button");
+                    btn.textContent = opt.text;
+                    btn.onclick = () => onOptionClick(q, opt);
+                    opts.appendChild(btn);
+                });
+            }
+            window.renderQuestion = renderQuestion;
+
+            function onOptionClick(q, opt) {
+                window.answers.push({
+                    question: q.question,
+                    selected: opt.text,
+                    correct: q.options.find(o => o.correct).text,
+                    acertou: opt.correct
+                });
+                if (opt.correct) window.score++;
+                window.currentQuestion++;
+                if (window.currentQuestion < quizData.length) {
+                    renderQuestion();
+                } else {
+                    showResult();
+                }
+            }
+
+            function showResult() {
+                quizPage.innerHTML = `
+      <div class="quiz-card">
+        <div class="quiz-result">
+          🎉 Fim do Quiz!<br>
+          Você acertou <b>${window.score}</b> de <b>${quizData.length}</b> perguntas.
+        </div>
+        <button id="closeQuizBtn" class="return-home-btn">Voltar para o site</button>
+      </div>`;
+                document.getElementById("closeQuizBtn").onclick = closeQuizToSite;
+                const email = prompt("Digite seu e-mail para salvar seu resultado (opcional):");
+                salvarResultadoQuiz(email, window.score, quizData.length, window.answers);
+            }
+
+            function closeQuizToSite() {
+                quizPage.style.display = "none";
+                quizOverlay.style.display = "none";
+                quizPage.innerHTML = ""; // 🔥 limpa o conteúdo ao fechar
+                const quizPromo = document.getElementById("quizBalloon");
+                if (quizPromo) quizPromo.style.display = "none";
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            async function salvarResultadoQuiz(user_email, score, total, answers) {
+                try {
+                    const res = await fetch("http://localhost:4000/api/quiz", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ user_email, score, total, answers })
+                    });
+                    if (res.ok) console.log("Resultado salvo!");
+                } catch (e) {
+                    console.error("Erro ao salvar quiz", e);
+                }
+            }
+
+            // Botão COMEÇAR
+            if (openQuizBtn) {
+                openQuizBtn.onclick = () => {
+                    if (typeof window.resetQuiz === "function") window.resetQuiz();
+                    if (quizPromo) quizPromo.style.display = "none";
+                    quizOverlay.style.display = "block";
+                    quizPage.style.display = "block";
+                    window.renderQuestion();
+                };
+            }
+
+            // Botão "Responder mais tarde"
+            if (deferQuizBtn) {
+                deferQuizBtn.onclick = () => {
+                    if (quizPromo) quizPromo.style.display = "none";
+                    quizOverlay.style.display = "none";
+                    if (typeof window.resetQuiz === "function") window.resetQuiz();
+                };
+            }
+
+            // Botão do Menu (abrir quiz pelo menu principal)
+            const menuQuizBtn = document.getElementById('menuQuizBtn');
+            if (menuQuizBtn) {
+                menuQuizBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const quizPromo = document.getElementById("quizBalloon");
+                    const quizOverlay = document.getElementById("quizOverlay");
+                    const quizPage = document.querySelector(".quiz-page");
+
+                    if (quizPromo) quizPromo.style.display = "none";
+                    if (quizOverlay) quizOverlay.style.display = "block";
+                    if (quizPage) {
+                        quizPage.style.display = "block";
+                        // Reinicia quiz ao abrir pelo menu
+                        currentQuestion = 0;
+                        score = 0;
+                        answers = [];
+                        // Modifique a função renderQuestion aqui
+                        function renderQuestion() {
+                            const q = quizData[currentQuestion];
+                            quizPage.innerHTML = `
+                                <div class="quiz-card">
+                                    <div class="quiz-question">${q.question}</div>
+                                    <div class="quiz-options"></div>
+                                    <div style="text-align:center; margin-top:20px;">
+                                        <button id="closeQuizBtn" class="return-home-btn">Voltar para o site</button>
+                                    </div>
+                                </div>`;
+                            
+
+                            const opts = quizPage.querySelector(".quiz-options");
+                            q.options.forEach(opt => {
+                                const btn = document.createElement("button");
+                                btn.textContent = opt.text;
+                                btn.onclick = () => onOptionClick(q, opt);
+                                opts.appendChild(btn);
+                            });
+
+                            // Adicionar evento ao botão voltar
+                            document.getElementById("closeQuizBtn").onclick = closeQuizToSite;
+                        }
+                        renderQuestion();
+                    }
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+        })();
+
+
+        // INTERATIVIDADE: Galeria de vídeos (Entrevistas)
+        document.querySelectorAll('.video-card').forEach(card => {
+            card.addEventListener('click', function () {
+                const videoUrl = this.getAttribute('data-video');
+                const modal = document.getElementById('videoModal');
+                const content = document.getElementById('videoModalContent');
+                if (videoUrl && modal && content) {
+                    content.innerHTML = `<video controls autoplay style="width:100%;height:100%;border-radius:12px;max-height:380px;background:#000;">
+                    <source src="${videoUrl}" type="video/mp4">
+                    Seu navegador não suporta vídeo HTML5.
+                </video>`;
+                    modal.style.display = 'flex';
+                    document.body.classList.add('quiz-lock');
+                }
+            });
+        });
+        document.getElementById('closeVideoModal').onclick = function () {
+            document.getElementById('videoModal').style.display = 'none';
+            document.getElementById('videoModalContent').innerHTML = '';
+            document.body.classList.remove('quiz-lock');
+        };
+        window.addEventListener('click', function (e) {
+            if (e.target === document.getElementById('videoModal')) {
+                document.getElementById('videoModal').style.display = 'none';
+                document.getElementById('videoModalContent').innerHTML = '';
+                document.body.classList.remove('quiz-lock');
+            }
+        });
+
+        // Controle de exibição do quiz
+document.addEventListener('DOMContentLoaded', function() {
+    const quizPromo = document.getElementById("quizBalloon");
+    
+    // Oculta o quiz inicialmente
+    if (quizPromo) {
+        quizPromo.style.display = "none";
+    }
+    
+    // Exibe o quiz após 2 segundos
+    setTimeout(() => {
+        if (quizPromo) {
+            quizPromo.style.display = "flex";
+            quizPromo.style.animation = "quizBounce 1s ease-out";
+        }
+    }, 2000);
+});
+    </script>
+</body>
+
+</html>
