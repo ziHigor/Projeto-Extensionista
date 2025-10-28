@@ -23,29 +23,38 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, // Usa o URL completo injetado
-});
+const { Client } = require("pg");
 
-// =======================================================
-// >>>>> NOVO BLOCO: TESTE DE CONEXÃO OBRIGATÓRIO <<<<<
-// =======================================================
-pool.connect()
-  .then(client => {
+// Use o DATABASE_URL para a conexão
+const connectionString = process.env.DATABASE_URL;
+
+// Tenta conectar e sair do processo se falhar.
+const testConnection = async () => {
+  const client = new Client({ connectionString });
+  
+  try {
+    await client.connect();
     console.log("-----------------------------------------");
     console.log("✅ CONEXÃO COM O BANCO DE DADOS BEM-SUCEDIDA!");
     console.log("-----------------------------------------");
-    client.release(); // Libera o cliente
-  })
-  .catch(err => {
+    await client.end(); // Fecha o cliente de teste
+  } catch (err) {
     console.error("=========================================");
     console.error("❌ ERRO CRÍTICO: FALHA AO CONECTAR AO DB!");
     console.error("ERRO COMPLETO:", err.message);
+    console.error("VERIFIQUE AS CREDENCIAIS E O STATUS DO POSTGRES!");
     console.error("=========================================");
-    // Esta linha é essencial para o Railway parar o loop e mostrar o erro
-    process.exit(1);
-  });
+    process.exit(1); // Encerra o processo para mostrar o erro no log
+  }
+};
 // =======================================================
+// Execute o teste de conexão.
+// O servidor só vai iniciar se este teste for bem-sucedido.
+testConnection();
+
+// O pool de conexão real para o servidor deve ser recriado aqui, APÓS o teste.
+const pool = new Pool({ connectionString });
+// Fim do bloco de conexão.
 
 
 // === ROTAS DA API === (sem alteração)
