@@ -30,17 +30,8 @@ app.use(express.json());
 let pool;
 
 // Objeto de configuração do DB: Usa variáveis separadas + SSL
-const dbConfig = {
-    user: process.env.PGUSER,
-    host: process.env.PGHOST,
-    database: process.env.PGDATABASE,
-    password: process.env.PGPASSWORD,
-    port: process.env.PGPORT ? parseInt(process.env.PGPORT) : 5432,
-    // ESSENCIAL PARA O RAILWAY: Configuração SSL
-    ssl: {
-        rejectUnauthorized: false
-    }
-};
+// Remova o bloco de dbConfig e use o URL completo.
+const connectionString = process.env.DATABASE_URL;
 
 
 // =======================================================
