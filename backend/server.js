@@ -31,6 +31,27 @@ const pool = new Pool({
   port: process.env.PGPORT ? Number(process.env.PGPORT) : 5432,
 });
 
+// =======================================================
+// >>>>> NOVO BLOCO: TESTE DE CONEXÃO OBRIGATÓRIO <<<<<
+// =======================================================
+pool.connect()
+  .then(client => {
+    console.log("-----------------------------------------");
+    console.log("✅ CONEXÃO COM O BANCO DE DADOS BEM-SUCEDIDA!");
+    console.log("-----------------------------------------");
+    client.release(); // Libera o cliente
+  })
+  .catch(err => {
+    console.error("=========================================");
+    console.error("❌ ERRO CRÍTICO: FALHA AO CONECTAR AO DB!");
+    console.error("ERRO COMPLETO:", err.message);
+    console.error("=========================================");
+    // Esta linha é essencial para o Railway parar o loop e mostrar o erro
+    process.exit(1);
+  });
+// =======================================================
+
+
 // === ROTAS DA API === (sem alteração)
 app.get("/api", (req, res) => {
   res.send("🚀 Novo servidor rodando!");
