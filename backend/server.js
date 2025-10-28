@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 const path = require("path");
-const { Client } = require("pg"); // Import desnecessário, mas mantido
+const { Client } = require("pg"); // Client não é usado, mas pode ficar se quiser
 
 const app = express();
 
@@ -30,18 +30,8 @@ app.use(express.json());
 let pool;
 
 // Objeto de configuração do DB: Usa variáveis separadas + SSL
-const dbConfig = {
-    // Estas são as variáveis que você deve configurar no Railway (PGHOST, PGPASSWORD, etc.)
-    user: process.env.PGUSER,
-    host: process.env.PGHOST,
-    database: process.env.PGDATABASE,
-    password: process.env.PGPASSWORD,
-    port: process.env.PGPORT ? parseInt(process.env.PGPORT) : 5432,
-    // ESSENCIAL PARA O RAILWAY: Configuração SSL
-    ssl: {
-        rejectUnauthorized: false
-    }
-};
+// Remova o bloco de dbConfig e use o URL completo.
+const connectionString = process.env.DATABASE_URL;
 
 
 // =======================================================
@@ -50,6 +40,7 @@ const dbConfig = {
 const initializeApp = async () => {
     
     // 1. TENTA CONEXÃO E CRIA O POOL
+    // Usa as variáveis separadas (PGUSER, PGPASSWORD, etc.)
     const dbPool = new Pool(dbConfig); 
     
     try {
@@ -78,17 +69,12 @@ const initializeApp = async () => {
 };
 
 // =======================================================
-// EXECUÇÃO DO FLUXO (Log de erro final corrigido)
+// EXECUÇÃO DO FLUXO
 // =======================================================
 initializeApp().then(dbPool => {
     pool = dbPool; // Atribui a pool globalmente APÓS a conexão
 }).catch(e => {
-    // Esta parte do código só é acionada se houver um erro no THEN, mas adicionamos o log de segurança
-    console.error("=========================================");
-    console.error("ERRO CRÍTICO NA FASE FINAL DE INICIALIZAÇÃO.");
-    console.error("Mensagem de erro:", e.message); 
-    console.error("=========================================");
-    process.exit(1);
+    console.error("Falha ao inicializar o aplicativo.");
 });
 
 
