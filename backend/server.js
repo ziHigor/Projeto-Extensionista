@@ -24,11 +24,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 const pool = new Pool({
-  host: process.env.PGHOST,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  database: process.env.PGDATABASE,
-  port: process.env.PGPORT ? Number(process.env.PGPORT) : 5432,
+  connectionString: process.env.DATABASE_URL, // Usa o URL completo injetado
 });
 
 // =======================================================
