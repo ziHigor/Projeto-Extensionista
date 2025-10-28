@@ -27,11 +27,18 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Variável de conexão: o Railway injeta o URL completo aqui
-const connectionString = process.env.DATABASE_URL;
+// Remova: const connectionString = process.env.DATABASE_URL;
+// E substitua por:
+let connectionString = process.env.URL_DO_BANCO_DE_DADOS; // <--- AQUI!
 
-// Variável global para o Pool de Conexão, que será inicializada DEPOIS do teste
-let pool;
+// Adicione a flag SSL (Continua sendo obrigatório!)
+if (connectionString && !connectionString.includes('sslmode')) {
+    connectionString += '?sslmode=require';
+}
+
+// O pool usa a string corrigida
+const pool = new Pool({ connectionString }); 
+// ...
 
 // =======================================================
 // FLUXO PRINCIPAL: Inicia o DB e depois inicia o Servidor
