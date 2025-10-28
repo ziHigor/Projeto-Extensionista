@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 const path = require("path");
-const { Client } = require("pg"); // Importa Client para o teste de conexão
+const { Client } = require("pg"); 
 
 const app = express();
 
@@ -27,26 +27,26 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Remova: const connectionString = process.env.DATABASE_URL;
-// E substitua por:
-let connectionString = process.env.URL_DO_BANCO_DE_DADOS; // <--- AQUI!
+// Variável de conexão: obtem o URL do Railway e adiciona o requisito SSL
+let connectionString = process.env.URL_DO_BANCO_DE_DADOS;
 
-// Adicione a flag SSL (Continua sendo obrigatório!)
+// Esta é a verificação de SSL que corrige o URL
 if (connectionString && !connectionString.includes('sslmode')) {
     connectionString += '?sslmode=require';
 }
 
-// O pool usa a string corrigida
-const pool = new Pool({ connectionString }); 
-// ...
+// Variável global para a pool de conexão
+let pool;
+
 
 // =======================================================
-// FLUXO PRINCIPAL: Inicia o DB e depois inicia o Servidor
+// FLUXO PRINCIPAL: Tenta conectar ao DB e Inicia o Servidor
 // =======================================================
 const initializeApp = async () => {
     
     // 1. TENTA CONEXÃO E CRIA O POOL
-    const dbPool = new Pool({ connectionString });
+    // A pool só é criada aqui, usando a string corrigida com SSL
+    const dbPool = new Pool({ connectionString }); 
     
     try {
         await dbPool.query('SELECT 1'); // Teste simples para verificar a conexão
@@ -67,7 +67,7 @@ const initializeApp = async () => {
         console.error("=========================================");
         console.error("❌ ERRO CRÍTICO: FALHA AO CONECTAR AO DB!");
         console.error("VERIFIQUE O STATUS DO POSTGRES E AS VARIÁVEIS DE AMBIENTE!");
-        console.error("ERRO COMPLETO:", err.message); // A MENSAGEM REAL ESTARÁ AQUI
+        console.error("ERRO COMPLETO:", err.message); // A MENSAGEM REAL VAI APARECER AQUI
         console.error("=========================================");
         process.exit(1); // Encerra o processo para mostrar o erro no log
     }
@@ -79,12 +79,12 @@ const initializeApp = async () => {
 initializeApp().then(dbPool => {
     pool = dbPool; // Atribui a pool globalmente APÓS a conexão
 }).catch(e => {
-    // Tratamento de erros de inicialização (já coberto acima, mas é seguro manter)
     console.error("Falha ao inicializar o aplicativo.");
 });
 
 
 // === ROTAS DA API === 
+
 app.get("/api", (req, res) => {
   res.send("🚀 Novo servidor rodando!");
 });
