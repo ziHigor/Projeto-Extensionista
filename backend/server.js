@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 const path = require("path");
-const { Client } = require("pg"); 
+const { Client } = require("pg"); // Client não é usado, mas pode ficar se quiser
 
 const app = express();
 
@@ -15,7 +15,6 @@ const corsOptions = {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            // Em produção, se quiser ser estrito: callback(new Error('Not allowed by CORS'));
             callback(null, true); 
         }
     },
@@ -27,16 +26,21 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Variável de conexão: obtem o URL do Railway e adiciona o requisito SSL
-let connectionString = process.env.URL_DO_BANCO_DE_DADOS;
-
-// Esta é a verificação de SSL que corrige o URL
-if (connectionString && !connectionString.includes('sslmode')) {
-    connectionString += '?sslmode=require';
-}
-
 // Variável global para a pool de conexão
 let pool;
+
+// Objeto de configuração do DB: Usa variáveis separadas + SSL
+const dbConfig = {
+    user: process.env.PGUSER,
+    host: process.env.PGHOST,
+    database: process.env.PGDATABASE,
+    password: process.env.PGPASSWORD,
+    port: process.env.PGPORT ? parseInt(process.env.PGPORT) : 5432,
+    // ESSENCIAL PARA O RAILWAY: Configuração SSL
+    ssl: {
+        rejectUnauthorized: false
+    }
+};
 
 
 // =======================================================
@@ -45,8 +49,8 @@ let pool;
 const initializeApp = async () => {
     
     // 1. TENTA CONEXÃO E CRIA O POOL
-    // A pool só é criada aqui, usando a string corrigida com SSL
-    const dbPool = new Pool({ connectionString }); 
+    // Usa as variáveis separadas (PGUSER, PGPASSWORD, etc.)
+    const dbPool = new Pool(dbConfig); 
     
     try {
         await dbPool.query('SELECT 1'); // Teste simples para verificar a conexão
@@ -84,7 +88,6 @@ initializeApp().then(dbPool => {
 
 
 // === ROTAS DA API === 
-
 app.get("/api", (req, res) => {
   res.send("🚀 Novo servidor rodando!");
 });
