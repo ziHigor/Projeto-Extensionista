@@ -3,7 +3,6 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 const path = require("path");
-const { Client } = require("pg"); // Client não é usado, mas pode ficar se quiser
 
 const app = express();
 
@@ -29,9 +28,23 @@ app.use(express.json());
 // Variável global para a pool de conexão
 let pool;
 
-// Objeto de configuração do DB: Usa variáveis separadas + SSL
-// Remova o bloco de dbConfig e use o URL completo.
-const connectionString = process.env.DATABASE_URL;
+// =======================================================
+// VARIÁVEL DE CONEXÃO (Obter URL e corrigir SSL/Nome do DB)
+// =======================================================
+// O código usará o valor da variável DATABASE_URL que você configurou no painel
+let connectionString = process.env.DATABASE_URL;
+
+// Corrigir o URL para o nome 'railway' e adicionar o requisito SSL
+if (connectionString) {
+    // 1. Garante que o DB se chama 'railway' (revertendo a tradução 'ferrovia')
+    // Substitui o último segmento (o nome do DB) por 'railway'
+    connectionString = connectionString.replace(/\/[^\/]+(\?.*)?$/, '/railway');
+    
+    // 2. Adiciona a flag SSL de desativação (para corrigir o erro de certificado)
+    if (!connectionString.includes('sslmode')) {
+        connectionString += '?sslmode=disable'; 
+    }
+}
 
 
 // =======================================================
@@ -39,9 +52,19 @@ const connectionString = process.env.DATABASE_URL;
 // =======================================================
 const initializeApp = async () => {
     
-    // 1. TENTA CONEXÃO E CRIA O POOL
-    // Usa as variáveis separadas (PGUSER, PGPASSWORD, etc.)
-    const dbPool = new Pool(dbConfig); 
+    // 1. VERIFICAÇÃO DE SEGURANÇA
+    if (!connectionString) {
+        console.error("ERRO CRÍTICO: Variável DATABASE_URL não foi encontrada. O app não pode iniciar.");
+        process.exit(1);
+    }
+
+    // 2. TENTA CONEXÃO E CRIA O POOL
+    const dbPool = new Pool({ 
+        connectionString,
+        ssl: {
+            rejectUnauthorized: false
+        }
+    }); 
     
     try {
         await dbPool.query('SELECT 1'); // Teste simples para verificar a conexão
@@ -51,17 +74,16 @@ const initializeApp = async () => {
         console.log("✅ CONEXÃO COM O BANCO DE DADOS BEM-SUCEDIDA!");
         console.log("-----------------------------------------");
         
-        // 2. INICIA O SERVIDOR APÓS O SUCESSO DA CONEXÃO
+        // 3. INICIA O SERVIDOR APÓS O SUCESSO DA CONEXÃO
         const PORT = process.env.PORT || 4000;
         app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 
         return dbPool; // Retorna a pool de conexão
         
     } catch (err) {
-        // 3. SE A CONEXÃO FALHAR, LOGA O ERRO COMPLETO E ENCERRA
+        // 4. SE A CONEXÃO FALHAR, LOGA O ERRO COMPLETO E ENCERRA
         console.error("=========================================");
         console.error("❌ ERRO CRÍTICO: FALHA AO CONECTAR AO DB!");
-        console.error("VERIFIQUE O STATUS DO POSTGRES E AS VARIÁVEIS DE AMBIENTE!");
         console.error("ERRO COMPLETO:", err.message); // A MENSAGEM REAL VAI APARECER AQUI
         console.error("=========================================");
         process.exit(1); // Encerra o processo para mostrar o erro no log
@@ -74,7 +96,9 @@ const initializeApp = async () => {
 initializeApp().then(dbPool => {
     pool = dbPool; // Atribui a pool globalmente APÓS a conexão
 }).catch(e => {
-    console.error("Falha ao inicializar o aplicativo.");
+    // Tratamento de erro final de segurança
+    console.error("Falha na inicialização final do aplicativo.");
+    process.exit(1);
 });
 
 
