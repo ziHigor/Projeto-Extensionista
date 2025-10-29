@@ -29,9 +29,18 @@ app.use(express.json());
 // Variável global para a pool de conexão
 let pool;
 
-// Objeto de configuração do DB: Usa variáveis separadas + SSL
-// Remova o bloco de dbConfig e use o URL completo.
-const connectionString = process.env.DATABASE_URL;
+// Obter o URL de conexão e adicionar o requisito SSL
+let connectionString = process.env.DATABASE_URL;
+
+// Esta é a verificação de SSL que corrige o URL
+if (connectionString) {
+    // CORREÇÃO: Altera o nome do DB de /railway para /ferrovia
+    connectionString = connectionString.replace('/railway', '/ferrovia');
+    // ADICIONA O SSL:
+    if (!connectionString.includes('sslmode')) {
+        connectionString += '?sslmode=disable'; 
+    }
+}
 
 
 // =======================================================
@@ -40,8 +49,12 @@ const connectionString = process.env.DATABASE_URL;
 const initializeApp = async () => {
     
     // 1. TENTA CONEXÃO E CRIA O POOL
-    // Usa as variáveis separadas (PGUSER, PGPASSWORD, etc.)
-    const dbPool = new Pool(dbConfig); 
+    const dbPool = new Pool({ 
+        connectionString,
+        ssl: {
+            rejectUnauthorized: false
+        }
+    }); 
     
     try {
         await dbPool.query('SELECT 1'); // Teste simples para verificar a conexão
@@ -74,7 +87,7 @@ const initializeApp = async () => {
 initializeApp().then(dbPool => {
     pool = dbPool; // Atribui a pool globalmente APÓS a conexão
 }).catch(e => {
-    console.error("Falha ao inicializar o aplicativo.");
+    console.error("Falha na inicialização final do aplicativo.");
 });
 
 
@@ -116,7 +129,7 @@ app.post("/api/quiz", async (req, res) => {
     }
 
     const q = `
-      INSERT INTO quiz_attempts (user_email, score, total, answers, ip, user_agent)
+      INSERT INTO quiz_attempts (user_email, score, total, answers, ip, user-agent)
       VALUES ($1,$2,$3,$4,$5,$6)
       RETURNING id, created_at
     `;
