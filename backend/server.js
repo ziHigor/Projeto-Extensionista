@@ -29,18 +29,20 @@ app.use(express.json());
 // Variável global para a pool de conexão
 let pool;
 
+// ...
 // Obter o URL de conexão e adicionar o requisito SSL
 let connectionString = process.env.DATABASE_URL;
 
-// Esta é a verificação de SSL que corrige o URL
+// ESSENCIAL: Garante que o nome do DB é 'railway' e adiciona a flag SSL
 if (connectionString) {
-    // CORREÇÃO: Altera o nome do DB de /railway para /ferrovia
-    connectionString = connectionString.replace('/railway', '/ferrovia');
-    // ADICIONA O SSL:
+    // 1. Substitui qualquer nome de DB por 'railway'
+    connectionString = connectionString.replace(/\/[^\/]+(\?.*)?$/, '/railway');
+    // 2. Adiciona a flag SSL, se não existir
     if (!connectionString.includes('sslmode')) {
         connectionString += '?sslmode=disable'; 
     }
 }
+// ...
 
 
 // =======================================================
