@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 const path = require("path");
+const { Client } = require("pg"); // Client não é usado, mas pode ficar se quiser
 
 const app = express();
 
@@ -28,14 +29,9 @@ app.use(express.json());
 // Variável global para a pool de conexão
 let pool;
 
-// Obter o URL de conexão e adicionar o requisito SSL
-// Prioriza o URL_DO_BANCO_DE_DADOS (o valor que você configurou)
-let connectionString = process.env.URL_DO_BANCO_DE_DADOS || process.env.DATABASE_URL; 
-
-// Adiciona a flag SSL (Continua sendo obrigatório!)
-if (connectionString && !connectionString.includes('sslmode')) {
-    connectionString += '?sslmode=require';
-}
+// Objeto de configuração do DB: Usa variáveis separadas + SSL
+// Remova o bloco de dbConfig e use o URL completo.
+const connectionString = process.env.DATABASE_URL;
 
 
 // =======================================================
@@ -43,14 +39,9 @@ if (connectionString && !connectionString.includes('sslmode')) {
 // =======================================================
 const initializeApp = async () => {
     
-    // Verifica se a string de conexão foi resolvida
-    if (!connectionString) {
-        console.error("ERRO CRÍTICO: String de conexão (URL_DO_BANCO_DE_DADOS) não foi encontrada!");
-        process.exit(1);
-    }
-
     // 1. TENTA CONEXÃO E CRIA O POOL
-    const dbPool = new Pool({ connectionString }); 
+    // Usa as variáveis separadas (PGUSER, PGPASSWORD, etc.)
+    const dbPool = new Pool(dbConfig); 
     
     try {
         await dbPool.query('SELECT 1'); // Teste simples para verificar a conexão
@@ -83,8 +74,7 @@ const initializeApp = async () => {
 initializeApp().then(dbPool => {
     pool = dbPool; // Atribui a pool globalmente APÓS a conexão
 }).catch(e => {
-    console.error("Falha na inicialização final do aplicativo.");
-    process.exit(1);
+    console.error("Falha ao inicializar o aplicativo.");
 });
 
 
