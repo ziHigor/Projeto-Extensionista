@@ -2,15 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
-const path = require("path");
 
 const app = express();
 
-// Configuração do CORS
 const allowedOrigins = ['https://inovacode.up.railway.app'];
 const corsOptions = {
     origin: (origin, callback) => {
-        // Permite o seu frontend e requisições sem 'origin'
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -25,143 +22,81 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Variável global para a pool de conexão
 let pool;
 
-// =======================================================
-// VARIÁVEL DE CONEXÃO (Obter URL e corrigir SSL/Nome do DB)
-// =======================================================
-// O código usará o valor da variável DATABASE_URL que você configurou no painel
-let connectionString = process.env.DATABASE_URL;
+// AJUSTE 1: Rota raiz para Health Check do Railway
+app.get("/", (req, res) => {
+  res.status(200).send("Backend is running and healthy!");
+});
 
-// Corrigir o URL para o nome 'railway' e adicionar o requisito SSL
-if (connectionString) {
-    // 1. Garante que o DB se chama 'railway' (revertendo a tradução 'ferrovia')
-    // Substitui o último segmento (o nome do DB) por 'railway'
-    connectionString = connectionString.replace(/\/[^\/]+(\?.*)?$/, '/railway');
-    
-    // 2. Adiciona a flag SSL de desativação (para corrigir o erro de certificado)
-    if (!connectionString.includes('sslmode')) {
-        connectionString += '?sslmode=disable'; 
-    }
+let connectionString = process.env.DATABASE_URL;
+if (connectionString && !connectionString.includes('sslmode')) {
+    // Força SSL se não tiver, mas usa 'require' que é mais padrão para urls externos se 'disable' falhar
+    // Se 'disable' funcionou antes, mantenha. Se não, tente 'require' ou 'no-verify'
+    connectionString += '?sslmode=require'; 
 }
 
-
-// =======================================================
-// FLUXO PRINCIPAL: Tenta conectar ao DB e Inicia o Servidor
-// =======================================================
 const initializeApp = async () => {
-    
-    // 1. VERIFICAÇÃO DE SEGURANÇA
     if (!connectionString) {
-        console.error("ERRO CRÍTICO: Variável DATABASE_URL não foi encontrada. O app não pode iniciar.");
+        console.error("ERRO CRÍTICO: DATABASE_URL faltando!");
         process.exit(1);
     }
 
-    // 2. TENTA CONEXÃO E CRIA O POOL
     const dbPool = new Pool({ 
         connectionString,
-        ssl: {
-            rejectUnauthorized: false
-        }
+        ssl: { rejectUnauthorized: false } // Isso geralmente cobre o 'self-signed'
     }); 
     
     try {
-        await dbPool.query('SELECT 1'); // Teste simples para verificar a conexão
+        await dbPool.query('SELECT 1');
+        console.log("✅ DB CONECTADO!");
         
-        // Se o teste for bem-sucedido:
-        console.log("-----------------------------------------");
-        console.log("✅ CONEXÃO COM O BANCO DE DADOS BEM-SUCEDIDA!");
-        console.log("-----------------------------------------");
-        
-        // 3. INICIA O SERVIDOR APÓS O SUCESSO DA CONEXÃO
         const PORT = process.env.PORT || 4000;
-        app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+        // AJUSTE 2: Forçar escuta no 0.0.0.0
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`✅ SERVIDOR ONLINE na porta ${PORT}`);
+        });
 
-        return dbPool; // Retorna a pool de conexão
-        
+        return dbPool;
     } catch (err) {
-        // 4. SE A CONEXÃO FALHAR, LOGA O ERRO COMPLETO E ENCERRA
-        console.error("=========================================");
-        console.error("❌ ERRO CRÍTICO: FALHA AO CONECTAR AO DB!");
-        console.error("ERRO COMPLETO:", err.message); // A MENSAGEM REAL VAI APARECER AQUI
-        console.error("=========================================");
-        process.exit(1); // Encerra o processo para mostrar o erro no log
+        console.error("❌ FALHA DB:", err.message);
+        process.exit(1);
     }
 };
 
-// =======================================================
-// EXECUÇÃO DO FLUXO
-// =======================================================
 initializeApp().then(dbPool => {
-    pool = dbPool; // Atribui a pool globalmente APÓS a conexão
+    pool = dbPool;
 }).catch(e => {
-    // Tratamento de erro final de segurança
-    console.error("Falha na inicialização final do aplicativo.");
+    console.error("Falha fatal na inicialização.");
     process.exit(1);
 });
 
+app.get("/api", (req, res) => res.send("🚀 API Online!"));
 
-// === ROTAS DA API === 
-app.get("/api", (req, res) => {
-  res.send("🚀 Novo servidor rodando!");
-});
-
-// Rota para leads
 app.post("/api/leads", async (req, res) => {
-  // Use a pool global
-  if (!pool) return res.status(503).json({ error: "Servidor indisponível: Conexão DB pendente" });
-  
+  if (!pool) return res.status(503).json({ error: "DB não pronto" });
   try {
     const { name, email, message } = req.body;
-    if (!name || !email) {
-      return res.status(400).json({ error: "Nome e email são obrigatórios" });
-    }
-
-    const q = "INSERT INTO leads (name, email, message) VALUES ($1,$2,$3) RETURNING id";
-    const r = await pool.query(q, [name, email, message]);
-
+    if (!name || !email) return res.status(400).json({ error: "Faltando dados" });
+    const r = await pool.query("INSERT INTO leads (name, email, message) VALUES ($1,$2,$3) RETURNING id", [name, email, message]);
     res.status(201).json({ id: r.rows[0].id });
   } catch (err) {
-    console.error("Erro ao salvar lead:", err);
+    console.error("Erro lead:", err);
     res.status(500).json({ error: "Erro interno" });
   }
 });
 
-// Rota para salvar quiz
 app.post("/api/quiz", async (req, res) => {
-  // Use a pool global
-  if (!pool) return res.status(503).json({ error: "Servidor indisponível: Conexão DB pendente" });
-
+  if (!pool) return res.status(503).json({ error: "DB não pronto" });
   try {
     const { user_email, score, total, answers } = req.body;
-    if (typeof score !== "number" || typeof total !== "number") {
-      return res.status(400).json({ error: "Payload inválido" });
-    }
-
-    const q = `
-      INSERT INTO quiz_attempts (user_email, score, total, answers, ip, user_agent)
-      VALUES ($1,$2,$3,$4,$5,$6)
-      RETURNING id, created_at
-    `;
-    const values = [
-      user_email || null,
-      score,
-      total,
-      answers ? JSON.stringify(answers) : null,
-      req.ip,
-      req.get("User-Agent") || null,
-    ];
-
-    const r = await pool.query(q, values);
-    res.status(201).json({ id: r.rows[0].id, created_at: r.rows[0].created_at });
+    const r = await pool.query(`INSERT INTO quiz_attempts (user_email, score, total, answers, ip, user_agent) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`, [user_email, score, total, JSON.stringify(answers), req.ip, req.get("User-Agent")]);
+    res.status(201).json({ id: r.rows[0].id });
   } catch (err) {
-    console.error("Erro ao salvar quiz:", err);
+    console.error("Erro quiz:", err);
     res.status(500).json({ error: "Erro interno" });
   }
 });
 
-// Fallback final
-app.use((req, res) => {
-  res.status(404).send("404: Endpoint da API não encontrado.");
-});
+// Fallback (deixe por último)
+app.use((req, res) => res.status(404).send("Rota não encontrada"));
