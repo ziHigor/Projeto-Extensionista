@@ -29,20 +29,9 @@ app.use(express.json());
 // Variável global para a pool de conexão
 let pool;
 
-// ...
-// Obter o URL de conexão e adicionar o requisito SSL
-let connectionString = process.env.DATABASE_URL;
-
-// ESSENCIAL: Garante que o nome do DB é 'railway' e adiciona a flag SSL
-if (connectionString) {
-    // 1. Substitui qualquer nome de DB por 'railway'
-    connectionString = connectionString.replace(/\/[^\/]+(\?.*)?$/, '/railway');
-    // 2. Adiciona a flag SSL, se não existir
-    if (!connectionString.includes('sslmode')) {
-        connectionString += '?sslmode=disable'; 
-    }
-}
-// ...
+// Objeto de configuração do DB: Usa variáveis separadas + SSL
+// Remova o bloco de dbConfig e use o URL completo.
+const connectionString = process.env.DATABASE_URL;
 
 
 // =======================================================
@@ -51,12 +40,8 @@ if (connectionString) {
 const initializeApp = async () => {
     
     // 1. TENTA CONEXÃO E CRIA O POOL
-    const dbPool = new Pool({ 
-        connectionString,
-        ssl: {
-            rejectUnauthorized: false
-        }
-    }); 
+    // Usa as variáveis separadas (PGUSER, PGPASSWORD, etc.)
+    const dbPool = new Pool(dbConfig); 
     
     try {
         await dbPool.query('SELECT 1'); // Teste simples para verificar a conexão
@@ -89,7 +74,7 @@ const initializeApp = async () => {
 initializeApp().then(dbPool => {
     pool = dbPool; // Atribui a pool globalmente APÓS a conexão
 }).catch(e => {
-    console.error("Falha na inicialização final do aplicativo.");
+    console.error("Falha ao inicializar o aplicativo.");
 });
 
 
@@ -131,7 +116,7 @@ app.post("/api/quiz", async (req, res) => {
     }
 
     const q = `
-      INSERT INTO quiz_attempts (user_email, score, total, answers, ip, user-agent)
+      INSERT INTO quiz_attempts (user_email, score, total, answers, ip, user_agent)
       VALUES ($1,$2,$3,$4,$5,$6)
       RETURNING id, created_at
     `;
