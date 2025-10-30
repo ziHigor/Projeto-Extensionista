@@ -8,13 +8,16 @@ const { Client } = require("pg"); // Client não é usado, mas pode ficar se qui
 const app = express();
 
 // Configuração do CORS
-const allowedOrigins = ['https://inovacode.up.railway.app'];
+// Apenas um exemplo de allowedOrigins, mantenha o que for mais seguro para você
+const allowedOrigins = ['https://inovacode.up.railway.app']; 
 const corsOptions = {
     origin: (origin, callback) => {
-        // Permite o seu frontend e requisições sem 'origin'
+        // Permite o seu frontend e requisições sem 'origin' (como ferramentas ou o próprio servidor)
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
+            // Se o seu código está permitindo 'origin' não permitido, ajuste aqui.
+            // Para o Railway, a melhor prática é permitir o seu frontend e talvez *qualquer* um (se a API for pública).
             callback(null, true); 
         }
     },
@@ -29,8 +32,7 @@ app.use(express.json());
 // Variável global para a pool de conexão
 let pool;
 
-// Objeto de configuração do DB: Usa variáveis separadas + SSL
-// Remova o bloco de dbConfig e use o URL completo.
+// Pega o DATABASE_URL do ambiente (que deve ser configurado no Railway)
 const connectionString = process.env.DATABASE_URL;
 
 
@@ -39,9 +41,23 @@ const connectionString = process.env.DATABASE_URL;
 // =======================================================
 const initializeApp = async () => {
     
+    // VERIFICAÇÃO DE SEGURANÇA: Se o URL não existe, avisa e encerra.
+    if (!connectionString) {
+        console.error("=========================================");
+        console.error("❌ ERRO CRÍTICO: Variável DATABASE_URL não definida!");
+        console.error("=========================================");
+        process.exit(1);
+    }
+    
     // 1. TENTA CONEXÃO E CRIA O POOL
-    // Usa as variáveis separadas (PGUSER, PGPASSWORD, etc.)
-    const dbPool = new Pool(dbConfig); 
+    // CORREÇÃO APLICADA AQUI: Usando connectionString e SSL
+    const dbPool = new Pool({
+        connectionString: connectionString,
+        // Configuração de SSL para o Railway (obrigatório para produção)
+        ssl: {
+            rejectUnauthorized: false
+        }
+    });
     
     try {
         await dbPool.query('SELECT 1'); // Teste simples para verificar a conexão
@@ -61,7 +77,6 @@ const initializeApp = async () => {
         // 3. SE A CONEXÃO FALHAR, LOGA O ERRO COMPLETO E ENCERRA
         console.error("=========================================");
         console.error("❌ ERRO CRÍTICO: FALHA AO CONECTAR AO DB!");
-        console.error("VERIFIQUE O STATUS DO POSTGRES E AS VARIÁVEIS DE AMBIENTE!");
         console.error("ERRO COMPLETO:", err.message); // A MENSAGEM REAL VAI APARECER AQUI
         console.error("=========================================");
         process.exit(1); // Encerra o processo para mostrar o erro no log
@@ -74,6 +89,7 @@ const initializeApp = async () => {
 initializeApp().then(dbPool => {
     pool = dbPool; // Atribui a pool globalmente APÓS a conexão
 }).catch(e => {
+    // Esta mensagem só aparece se initializeApp() falhar por um erro não capturado no try/catch interno.
     console.error("Falha ao inicializar o aplicativo.");
 });
 
