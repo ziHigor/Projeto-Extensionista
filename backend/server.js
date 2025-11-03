@@ -29,8 +29,7 @@ app.use(express.json());
 // Variável global para a pool de conexão
 let pool;
 
-// Objeto de configuração do DB: Usa variáveis separadas + SSL
-// Remova o bloco de dbConfig e use o URL completo.
+// Pega o DATABASE_URL do ambiente (configurado no Railway)
 const connectionString = process.env.DATABASE_URL;
 
 
@@ -38,10 +37,23 @@ const connectionString = process.env.DATABASE_URL;
 // FLUXO PRINCIPAL: Tenta conectar ao DB e Inicia o Servidor
 // =======================================================
 const initializeApp = async () => {
+
+    // Adiciona verificação para garantir que o URL está definido
+    if (!connectionString) {
+        console.error("=========================================");
+        console.error("❌ ERRO CRÍTICO: Variável DATABASE_URL não definida!");
+        console.error("=========================================");
+        process.exit(1);
+    }
     
     // 1. TENTA CONEXÃO E CRIA O POOL
-    // Usa as variáveis separadas (PGUSER, PGPASSWORD, etc.)
-    const dbPool = new Pool(dbConfig); 
+    // CORREÇÃO: Usando connectionString e configuração de SSL para Railway
+    const dbPool = new Pool({
+        connectionString: connectionString, // Usa o URL completo do Railway
+        ssl: {
+            rejectUnauthorized: false // Ignora certificados auto-assinados (padrão em cloud hosts como Railway)
+        }
+    }); 
     
     try {
         await dbPool.query('SELECT 1'); // Teste simples para verificar a conexão
