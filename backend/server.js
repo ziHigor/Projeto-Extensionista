@@ -3,11 +3,10 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 const path = require("path");
-const { Client } = require("pg"); // Client não é usado, mas pode ficar se quiser
 
 const app = express();
 
-// Configuração do CORS
+// Configuração do CORS (Mantenho a sua lógica original)
 const allowedOrigins = ['https://inovacode.up.railway.app'];
 const corsOptions = {
     origin: (origin, callback) => {
@@ -15,6 +14,7 @@ const corsOptions = {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
+            // Em produção, você pode querer mudar isso para: callback(new Error('Not allowed by CORS'))
             callback(null, true); 
         }
     },
@@ -29,31 +29,26 @@ app.use(express.json());
 // Variável global para a pool de conexão
 let pool;
 
-// Pega o DATABASE_URL do ambiente (configurado no Railway)
+// =======================================================
+// ** CORREÇÃO AQUI **: Configuração da Conexão
+// =======================================================
 const connectionString = process.env.DATABASE_URL;
 
+// Configuração para o Pool, usando a connectionString e habilitando o SSL
+const dbConfig = {
+    connectionString: connectionString, // Usa a URL completa do Railway
+    ssl: {
+        rejectUnauthorized: false // CRÍTICO para Railway: Permite a conexão SSL
+    }
+};
 
 // =======================================================
 // FLUXO PRINCIPAL: Tenta conectar ao DB e Inicia o Servidor
 // =======================================================
 const initializeApp = async () => {
-
-    // Adiciona verificação para garantir que o URL está definido
-    if (!connectionString) {
-        console.error("=========================================");
-        console.error("❌ ERRO CRÍTICO: Variável DATABASE_URL não definida!");
-        console.error("=========================================");
-        process.exit(1);
-    }
     
     // 1. TENTA CONEXÃO E CRIA O POOL
-    // CORREÇÃO: Usando connectionString e configuração de SSL para Railway
-    const dbPool = new Pool({
-        connectionString: connectionString, // Usa o URL completo do Railway
-        ssl: {
-            rejectUnauthorized: false // Ignora certificados auto-assinados (padrão em cloud hosts como Railway)
-        }
-    }); 
+    const dbPool = new Pool(dbConfig); 
     
     try {
         await dbPool.query('SELECT 1'); // Teste simples para verificar a conexão
@@ -76,7 +71,10 @@ const initializeApp = async () => {
         console.error("VERIFIQUE O STATUS DO POSTGRES E AS VARIÁVEIS DE AMBIENTE!");
         console.error("ERRO COMPLETO:", err.message); // A MENSAGEM REAL VAI APARECER AQUI
         console.error("=========================================");
-        process.exit(1); // Encerra o processo para mostrar o erro no log
+        // É importante NÃO usar process.exit(1) se quiser que o Railway tente reiniciar.
+        // Mas para fins de diagnóstico imediato, process.exit(1) é útil.
+        // Vou manter process.exit(1) para garantir que a falha seja clara.
+        process.exit(1); 
     }
 };
 
