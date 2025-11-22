@@ -825,61 +825,21 @@
         /* Quiz Promo */
         .quiz-promo {
             position: fixed;
-            inset: 0;
-            z-index: 1200;
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(circle at 50% 30%, #00ff9d 0%, #00d9ff 40%, #10181f 100%);
-            background-size: cover;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            animation: quizFullFadeIn .8s cubic-bezier(.4, 0, .2, 1);
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85) inset;
-            overflow: hidden;
-        }
-
-        @keyframes quizFullFadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes quizBounce {
-            0% {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
-
-            75% {
-                transform: translateY(10px);
-            }
-
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .quiz-promo {
-            animation: quizBounce 1s ease-out;
-            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 1200;
-            display: none;
+            display: none; /* exibido via JS */
+            width: min(92vw, 640px);
+            max-width: 640px;
+            padding: 1.6rem;
+            border-radius: 20px;
+            background: radial-gradient(circle at 50% 30%, #00ff9d 0%, #00d9ff 40%, #10181f 100%);
+            box-shadow: 0 12px 48px rgba(0, 255, 157, 0.18), 0 0 80px rgba(0, 217, 255, 0.10);
+            animation: quizBounce 1s ease-out;
         }
 
+        /* Remova/ignore o grande inset overlay aqui — o overlay já é feito por #quizOverlay */
         .quiz-promo .promo-icon {
             font-size: 5rem;
             color: var(--accent-purple);
