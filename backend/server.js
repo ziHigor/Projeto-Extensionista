@@ -2,33 +2,47 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg"); // Importação do Pool
-const path = require("path");
+const path = require = require("path");
 
 const app = express();
 
-// ... (Seu CORS e Middlewares) ...
+// ** DEFINIÇÃO CORRETA DAS VARIÁVEIS CORS **
 const allowedOrigins = ['https://inovacode.up.railway.app'];
-// ... (Seu CORS e Middlewares) ...
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Permite o seu frontend e requisições sem 'origin'
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            // Se necessário, pode retornar um erro aqui: callback(new Error('Not allowed by CORS'));
+            callback(null, true); 
+        }
+    },
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+    optionsSuccessStatus: 204
+};
 
+// ** USO CORRETO DO CORS **
 app.use(cors(corsOptions));
 app.use(express.json());
 
 // Variável global para a pool de conexão
 let pool = null; 
 
-// ** CONFIGURAÇÃO DE DB **
+// ** CONFIGURAÇÃO DE DB (MANTIDA FORA DO LISTEN PARA FÁCIL ACESSO) **
 const connectionString = process.env.DATABASE_URL;
 const dbConfig = {
     connectionString: connectionString, 
     ssl: {
-        rejectUnauthorized: false // CRÍTICO para SSL
+        rejectUnauthorized: false // CRÍTICO para SSL no Railway
     }
 };
 
 
 // === ROTAS DA API === 
 
-// ** ROTA DE HEALTH CHECK **
+// ** ROTA DE HEALTH CHECK **: CRÍTICO PARA O RAILWAY
 app.get("/health", (req, res) => {
     // Retorna 200 (OK) sempre que o servidor estiver rodando
     return res.status(200).send("OK");
@@ -44,7 +58,6 @@ app.post("/api/leads", async (req, res) => {
   // Use a pool global
   if (!pool) return res.status(503).json({ error: "Servidor indisponível: Conexão DB pendente" });
   
-  // ... (Sua lógica de DB original) ...
   try {
     const { name, email, message } = req.body;
     if (!name || !email) {
@@ -66,7 +79,6 @@ app.post("/api/quiz", async (req, res) => {
   // Use a pool global
   if (!pool) return res.status(503).json({ error: "Servidor indisponível: Conexão DB pendente" });
 
-  // ... (Sua lógica de DB original) ...
   try {
     const { user_email, score, total, answers } = req.body;
     if (typeof score !== "number" || typeof total !== "number") {
@@ -106,6 +118,7 @@ app.use((req, res) => {
 // =======================================================
 const PORT = process.env.PORT || 4000;
 
+// Inicia o servidor Express de forma síncrona
 app.listen(PORT, async () => {
     console.log("-----------------------------------------");
     console.log(`✅ Servidor Express rodando na porta ${PORT}`);
