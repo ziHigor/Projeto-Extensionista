@@ -1,7 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { Pool } = require("pg");
+// Removendo a importação de Pool para simplificar, mas você pode deixar
+// const { Pool } = require("pg"); 
 const path = require("path");
 
 const app = express();
@@ -10,6 +11,7 @@ const app = express();
 const allowedOrigins = ['https://inovacode.up.railway.app'];
 const corsOptions = {
     origin: (origin, callback) => {
+        // Permite o seu frontend e requisições sem 'origin'
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -25,70 +27,14 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Variável global para a pool de conexão
-let pool = null; // pool inicializado como null
-
-// =======================================================
-// ** CORREÇÃO DE DB **: Configuração da Conexão e SSL
-// =======================================================
-const connectionString = process.env.DATABASE_URL;
-
-// Configuração para o Pool, usando a connectionString e habilitando o SSL
-// MANTEMOS A CONFIGURAÇÃO CASO QUEIRA ATIVAR DE NOVO
-const dbConfig = {
-    connectionString: connectionString, 
-    ssl: {
-        rejectUnauthorized: false
-    }
-};
-
-// =======================================================
-// FLUXO PRINCIPAL: Tenta conectar ao DB e Inicia o Servidor
-// =======================================================
-const initializeApp = async () => {
-    
-    // 1. TENTA CONEXÃO E CRIA O POOL
-    
-    try {
-        
-        // *************************************************************
-        // ** DEBBUG TEMPORÁRIO: CONEXÃO COM DB FOI REMOVIDA DAQUI **
-        // *************************************************************
-        
-        console.log("-----------------------------------------");
-        console.log("✅ CONEXÃO COM O BANCO DE DADOS TEMPORARIAMENTE IGNORADA!");
-        console.log("-----------------------------------------");
-        
-        // 2. INICIA O SERVIDOR APÓS O SUCESSO DA CONEXÃO
-        const PORT = process.env.PORT || 4000;
-        app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
-
-        return null; // Retorna null, pois não criamos a Pool
-        
-    } catch (err) {
-        // Se a inicialização do app falhar por outro motivo
-        console.error("=========================================");
-        console.error("❌ ERRO CRÍTICO: FALHA AO INICIALIZAR O APP!");
-        console.error("ERRO COMPLETO:", err.message); 
-        console.error("=========================================");
-        return null; 
-    }
-};
-
-// =======================================================
-// EXECUÇÃO DO FLUXO
-// =======================================================
-initializeApp().then(dbPool => {
-    // pool permanece null aqui, pois initializeApp retorna null
-}).catch(e => {
-    console.error("Falha ao inicializar o aplicativo.");
-});
+let pool = null; // pool inicializado como null, desativando o DB por enquanto
 
 
 // === ROTAS DA API === 
 
 // ** ROTA DE HEALTH CHECK **: CRÍTICO PARA O RAILWAY
 app.get("/health", (req, res) => {
-    // Apenas retorna OK para o Health Check
+    // A rota mais simples e garantida para retornar 200 (OK)
     return res.status(200).send("OK");
 });
 
@@ -100,15 +46,34 @@ app.get("/api", (req, res) => {
 // Rotas de DB (agora retornarão 503, pois 'pool' é null)
 app.post("/api/leads", async (req, res) => {
   if (!pool) return res.status(503).json({ error: "Servidor indisponível: Conexão DB pendente" });
-  // ... (restante da rota, nunca será executada)
+  
+  // O código abaixo não será executado por enquanto, mas está correto
+  // ...
 });
 
 app.post("/api/quiz", async (req, res) => {
   if (!pool) return res.status(503).json({ error: "Servidor indisponível: Conexão DB pendente" });
-  // ... (restante da rota, nunca será executada)
+
+  // O código abaixo não será executado por enquanto, mas está correto
+  // ...
 });
 
 // Fallback final
 app.use((req, res) => {
   res.status(404).send("404: Endpoint da API não encontrado.");
 });
+
+
+// =======================================================
+// ** INICIALIZAÇÃO SÍNCRONA **
+// =======================================================
+const PORT = process.env.PORT || 4000;
+
+// O servidor Express inicia de forma síncrona
+app.listen(PORT, () => {
+    console.log("-----------------------------------------");
+    console.log(`✅ Servidor rodando na porta ${PORT} (Conexão DB Desativada)`);
+    console.log("-----------------------------------------");
+});
+
+// Importante: REMOVA a função initializeApp e o initializeApp().then() que você tinha anteriormente.
