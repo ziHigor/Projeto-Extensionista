@@ -1716,111 +1716,44 @@
                                 data-desc="Atividades extracurriculares para complementação da formação.">Atividades
                                 Complementares II – 100h</span>;
                             <span class="disciplina"
-                                data-desc="Aspectos éticos e legais relacionados à tecnologia da informação.">Ética e
-                                Legislação em TI – 60h</span>;
-                            <span class="disciplina"
-                                data-desc="Estudo de tópicos avançados em sistemas de informação.">Tópicos Avançados em
-                                Sistemas de Informação – 60h</span>;
-                            <span class="disciplina"
-                                data-desc="Estudo de tópicos avançados em telecomunicações.">Tópicos Avançados em
-                                Telecomunicações – 60h</span>;
-                            <span class="disciplina"
-                                data-desc="Desenvolvimento e apresentação do Trabalho de Curso.">Trabalho de Curso –
-                                120h</span>.
-                            Subtotal: 400h
+                                data-desc="Trabalho de conclusão de curso, integrando conhecimentos e práticas.">Trabalho
+                                de Conclusão de Curso – 200h</span>.
+                            Subtotal: 300h
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <div style="margin-top:18px; color: rgba(240,240,240,0.85);">Carga horária final do curso: 1º ao 8º período =
-            400h cada. Carga horária total = 3.200 horas.</div>
     </section>
 
-    <!-- MODAL DE DESCRIÇÃO DE DISCIPLINA -->
-    <div id="disciplinaModal"
-        style="display:none;position:fixed;z-index:2100;inset:0;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;">
-        <div
-            style="background:#181818;border-radius:18px;max-width:90vw;min-width:260px;padding:2rem;box-shadow:0 0 40px #00ff9d;border:2px solid #00ff9d;position:relative;">
-            <button id="closeDisciplinaModal"
-                style="position:absolute;top:10px;right:10px;background:var(--accent-purple);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;font-size:1.1rem;">X</button>
-            <div id="disciplinaModalContent" style="color:#fff;font-size:1.1rem;"></div>
-        </div>
-    </div>
-
-    <!-- Calculadora + Código Fonte ao lado -->
+    <!-- Calculadora Profissional -->
     <section id="calculadora">
         <div class="section-title">
-            <h2>CALCULADORA INTERATIVA + CÓDIGO FONTE</h2>
+            <h2>CALCULADORA DE IDEIAS</h2>
         </div>
         <div class="cyber-calculator">
-            <div class="calc-panel">
-                <div class="calc-display" id="display">0</div>
-                <div class="calc-buttons">
-                    <button class="cyber-btn" data-value="7">7</button>
-                    <button class="cyber-btn" data-value="8">8</button>
-                    <button class="cyber-btn" data-value="9">9</button>
-                    <button class="cyber-btn operator" data-value="/">/</button>
-                    <button class="cyber-btn" data-value="4">4</button>
-                    <button class="cyber-btn" data-value="5">5</button>
-                    <button class="cyber-btn" data-value="6">6</button>
-                    <button class="cyber-btn operator" data-value="*">×</button>
-                    <button class="cyber-btn" data-value="1">1</button>
-                    <button class="cyber-btn" data-value="2">2</button>
-                    <button class="cyber-btn" data-value="3">3</button>
-                    <button class="cyber-btn operator" data-value="-">-</button>
-                    <button class="cyber-btn" data-value="0">0</button>
-                    <button class="cyber-btn" data-value=".">.</button>
-                    <button class="cyber-btn equals" id="equalsBtn">=</button>
-                    <button class="cyber-btn operator" data-value="+">+</button>
-                    <button class="cyber-btn clear" id="clearBtn">C</button>
-                </div>
+            <div class="calc-display" id="display">0</div>
+            <div class="calc-buttons">
+                <button class="cyber-btn" data-value="7">7</button>
+                <button class="cyber-btn" data-value="8">8</button>
+                <button class="cyber-btn" data-value="9">9</button>
+                <button class="cyber-btn operator" data-value="/">÷</button>
+                <button class="cyber-btn" data-value="4">4</button>
+                <button class="cyber-btn" data-value="5">5</button>
+                <button class="cyber-btn" data-value="6">6</button>
+                <button class="cyber-btn operator" data-value="*">×</button>
+                <button class="cyber-btn" data-value="1">1</button>
+                <button class="cyber-btn" data-value="2">2</button>
+                <button class="cyber-btn" data-value="3">3</button>
+                <button class="cyber-btn operator" data-value="-">-</button>
+                <button class="cyber-btn" data-value="0">0</button>
+                <button class="cyber-btn" data-value=".">.</button>
+                <button class="cyber-btn clear" id="clearBtn">C</button>
+                <button class="cyber-btn operator" data-value="+">+</button>
+                <button class="cyber-btn equals" id="equalsBtn">=</button>
             </div>
-            <div class="code-panel">
-                <strong style="color:var(--neon-green);">Código fonte da Calculadora (JS)</strong>
-                <pre
-                    style="white-space:pre-wrap; margin-top:8px; background:#181818; color:#fff; border-radius:10px; padding:1rem; font-size:1rem; border:1px solid #00ff9d;">
-<span style="color:#00ff9d">// Calculadora Interativa - JavaScript</span>
-
-<span style="color:#00d9ff">let displayValue = '0';</span> <span style="color:#bd00ff">// Valor exibido no visor</span>
-
-<span style="color:#bd00ff">// Atualiza o visor da calculadora</span>
-<span style="color:#00ff9d">function</span> updateDisplay() {
-    document.getElementById('display').innerText = displayValue;
-}
-
-<span style="color:#bd00ff">// Adiciona número ou operador ao visor</span>
-<span style="color:#00ff9d">function</span> appendToDisplay(value) {
-    <span style="color:#00d9ff">const operators = '+-*/';</span>
-    <span style="color:#00d9ff">const lastChar = displayValue.slice(-1);</span>
-
-    <span style="color:#bd00ff">// Corrige botão de multiplicação visual</span>
-    <span style="color:#00ff9d">if</span> (value === '×') value = '*';
-
-    <span style="color:#bd00ff">// Evita operadores duplicados</span>
-    <span style="color:#00ff9d">if</span> (operators.includes(value) && operators.includes(lastChar)) {
-        displayValue = displayValue.slice(0, -1) + value;
-        updateDisplay();
-        <span style="color:#00ff9d">return</span>;
-    }
-    <span style="color:#bd00ff">// Evita múltiplos pontos decimais</span>
-    <span style="color:#00ff9d">if</span> (value === '.' && /\.\d*$/.test(displayValue)) <span style="color:#00ff9d">return</span>;
-
-    <span style="color:#bd00ff">// Substitui zero inicial (exceto ponto)</span>
-    <span style="color:#00ff9d">if</span> (displayValue === '0' && value !== '.') {
-        displayValue = value;
-    } else {
-        displayValue += value;
-    }
-    updateDisplay();
-}
-
-<span style="color:#bd00ff">// Limpa o visor</span>
-<span style="color:#00ff9d">function</span> clearDisplay() {
-    displayValue = '0';
-    updateDisplay();
-}
-
+            <div class="code-panel" id="codePanel">
+                <pre id="codeOutput" style="margin:0; padding:0; overflow:auto; max-height:180px; color:var(--light-text);">
 <span style="color:#bd00ff">// Realiza o cálculo da expressão</span>
 <span style="color:#00ff9d">function</span> calculate() {
     <span style="color:#00ff9d">try</span> {
