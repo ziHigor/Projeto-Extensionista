@@ -6,7 +6,7 @@ const path = require("path");
 
 const app = express();
 
-// Configuração do CORS (Mantenho a sua lógica original)
+// Configuração do CORS
 const allowedOrigins = ['https://inovacode.up.railway.app'];
 const corsOptions = {
     origin: (origin, callback) => {
@@ -14,7 +14,6 @@ const corsOptions = {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            // Em produção, você pode querer mudar isso para: callback(new Error('Not allowed by CORS'))
             callback(null, true); 
         }
     },
@@ -30,7 +29,7 @@ app.use(express.json());
 let pool;
 
 // =======================================================
-// ** CORREÇÃO AQUI **: Configuração da Conexão
+// ** CORREÇÃO DE DB **: Configuração da Conexão e SSL
 // =======================================================
 const connectionString = process.env.DATABASE_URL;
 
@@ -65,16 +64,16 @@ const initializeApp = async () => {
         return dbPool; // Retorna a pool de conexão
         
     } catch (err) {
-        // 3. SE A CONEXÃO FALHAR, LOGA O ERRO COMPLETO E ENCERRA
+        // 3. SE A CONEXÃO FALHAR, LOGA O ERRO COMPLETO 
         console.error("=========================================");
         console.error("❌ ERRO CRÍTICO: FALHA AO CONECTAR AO DB!");
         console.error("VERIFIQUE O STATUS DO POSTGRES E AS VARIÁVEIS DE AMBIENTE!");
         console.error("ERRO COMPLETO:", err.message); // A MENSAGEM REAL VAI APARECER AQUI
         console.error("=========================================");
-        // É importante NÃO usar process.exit(1) se quiser que o Railway tente reiniciar.
-        // Mas para fins de diagnóstico imediato, process.exit(1) é útil.
-        // Vou manter process.exit(1) para garantir que a falha seja clara.
-        process.exit(1); 
+        
+        // Removido process.exit(1) para permitir que o Railway tente se recuperar/reiniciar
+        // Se a conexão falhar, o pool permanecerá null, e as rotas responderão 503.
+        return null; 
     }
 };
 
@@ -82,13 +81,25 @@ const initializeApp = async () => {
 // EXECUÇÃO DO FLUXO
 // =======================================================
 initializeApp().then(dbPool => {
-    pool = dbPool; // Atribui a pool globalmente APÓS a conexão
+    pool = dbPool; // Atribui a pool globalmente APÓS a conexão (ou null se falhou)
 }).catch(e => {
     console.error("Falha ao inicializar o aplicativo.");
 });
 
 
 // === ROTAS DA API === 
+
+// ** ROTA DE HEALTH CHECK **: CRÍTICO PARA O RAILWAY
+app.get("/health", (req, res) => {
+    // Verifica se a pool está ativa (opcional, mas bom)
+    if (pool) {
+        return res.status(200).send("OK - DB Conectado");
+    }
+    // Se o pool falhou na inicialização, retorna um status de erro
+    return res.status(503).send("ERRO - DB Pendente");
+});
+
+
 app.get("/api", (req, res) => {
   res.send("🚀 Novo servidor rodando!");
 });
