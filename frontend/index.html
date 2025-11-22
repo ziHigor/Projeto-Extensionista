@@ -1738,17 +1738,34 @@
 
 <span style="color:#bd00ff">// Realiza o cálculo da expressão</span>
 <span style="color:#00ff9d">function</span> calculate() {
-    <span style="color:#00ff9d">try</span> {
-        <span style="color:#bd00ff">// Permite apenas números, operadores e parênteses</span>
-        <span style="color:#00ff9d">if</span> (/^[0-9+\-*/(). ]+$/.test(displayValue)) {
-            <span style="color:#bd00ff">// Avaliação segura</span>
-            <span style="color:#00d9ff">const result = Function('"use strict";return (' + displayValue + ')')();</span>
-            <span style="color:#00ff9d">if</span> (Number.isFinite(result)) displayValue = String(result);
-            <span style="color:#00ff9d">else</span> displayValue = 'Erro';
-        } <span style="color:#00ff9d">else</span> {
+    try {
+        // Normaliza possíveis símbolos visuais
+        let expr = displayValue.replace(/×/g, '*').replace(/÷/g, '/').trim();
+
+        // Rejeita caracteres inesperados
+        if (!/^[0-9+\-*/().\s]+$/.test(expr)) throw new Error('invalid');
+
+        // Remove operadores/dots finais (ex: "5+","3.")
+        expr = expr.replace(/[+\-*/.\s]+$/g, '');
+
+        // Se ficou vazio -> zera
+        if (!expr) { displayValue = '0'; updateDisplay(); return; }
+
+        // Balanceia parênteses automaticamente (fecha os que faltam)
+        const opens = (expr.match(/\(/g) || []).length;
+        const closes = (expr.match(/\)/g) || []).length;
+        if (opens > closes) expr += ')'.repeat(opens - closes);
+
+        // Avalia de forma controlada
+        const result = Function('"use strict";return (' + expr + ')')();
+
+        if (typeof result === 'number' && Number.isFinite(result)) {
+            // Evita excesso de casas decimais
+            displayValue = String(Math.round((result + Number.EPSILON) * 1e12) / 1e12);
+        } else {
             displayValue = 'Erro';
         }
-    } <span style="color:#00ff9d">catch</span> (e) {
+    } catch (e) {
         displayValue = 'Erro';
     }
     updateDisplay();
@@ -2014,10 +2031,29 @@ updateDisplay();
 
             function calculate() {
                 try {
-                    if (/^[0-9+\-*/(). ]+$/.test(displayValue)) {
-                        const result = Function('"use strict";return (' + displayValue + ')')();
-                        if (Number.isFinite(result)) displayValue = String(result);
-                        else displayValue = 'Erro';
+                    // Normaliza possíveis símbolos visuais
+                    let expr = displayValue.replace(/×/g, '*').replace(/÷/g, '/').trim();
+
+                    // Rejeita caracteres inesperados
+                    if (!/^[0-9+\-*/().\s]+$/.test(expr)) throw new Error('invalid');
+
+                    // Remove operadores/dots finais (ex: "5+","3.")
+                    expr = expr.replace(/[+\-*/.\s]+$/g, '');
+
+                    // Se ficou vazio -> zera
+                    if (!expr) { displayValue = '0'; updateDisplay(); return; }
+
+                    // Balanceia parênteses automaticamente (fecha os que faltam)
+                    const opens = (expr.match(/\(/g) || []).length;
+                    const closes = (expr.match(/\)/g) || []).length;
+                    if (opens > closes) expr += ')'.repeat(opens - closes);
+
+                    // Avalia de forma controlada
+                    const result = Function('"use strict";return (' + expr + ')')();
+
+                    if (typeof result === 'number' && Number.isFinite(result)) {
+                        // Evita excesso de casas decimais
+                        displayValue = String(Math.round((result + Number.EPSILON) * 1e12) / 1e12);
                     } else {
                         displayValue = 'Erro';
                     }
