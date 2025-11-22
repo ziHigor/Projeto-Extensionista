@@ -1,63 +1,55 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { Pool } = require("pg"); // Importação do Pool
-const path = require = require("path");
+const { Pool } = require("pg");
 
 const app = express();
 
 // ** DEFINIÇÃO CORRETA DAS VARIÁVEIS CORS **
 const allowedOrigins = ['https://inovacode.up.railway.app'];
 const corsOptions = {
-    origin: (origin, callback) => {
-        // Permite o seu frontend e requisições sem 'origin'
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            // Se necessário, pode retornar um erro aqui: callback(new Error('Not allowed by CORS'));
-            callback(null, true); 
-        }
-    },
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true,
-    optionsSuccessStatus: 204
+  origin: (origin, callback) => {
+    // Permite o seu frontend e requisições sem 'origin' (ex: Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      // Se quiser bloquear origens não listadas, troque o next por: callback(new Error('Not allowed by CORS'));
+      callback(null, true);
+    }
+  },
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  optionsSuccessStatus: 204
 };
 
-// ** USO CORRETO DO CORS **
 app.use(cors(corsOptions));
 app.use(express.json());
 
 // Variável global para a pool de conexão
-let pool = null; 
+let pool = null;
 
 // ** CONFIGURAÇÃO DE DB (MANTIDA FORA DO LISTEN PARA FÁCIL ACESSO) **
-const connectionString = process.env.DATABASE_URL;
-const dbConfig = {
-    connectionString: connectionString, 
-    ssl: {
-        rejectUnauthorized: false // CRÍTICO para SSL no Railway
-    }
-};
+const connectionString = process.env.DATABASE_URL || null;
+const dbConfig = connectionString ? {
+  connectionString,
+  ssl: {
+    rejectUnauthorized: false // necessário no Railway para SSL
+  }
+} : null;
 
+// === ROTAS DA API ===
 
-// === ROTAS DA API === 
+// Health-check (útil para Railway / load balancers)
+app.get("/health", (_req, res) => res.status(200).send("OK"));
 
-// ** ROTA DE HEALTH CHECK **: CRÍTICO PARA O RAILWAY
-app.get("/health", (req, res) => {
-    // Retorna 200 (OK) sempre que o servidor estiver rodando
-    return res.status(200).send("OK");
-});
-
-
-app.get("/api", (req, res) => {
+app.get("/api", (_req, res) => {
   res.send("🚀 Novo servidor rodando!");
 });
 
 // Rota para leads
 app.post("/api/leads", async (req, res) => {
-  // Use a pool global
   if (!pool) return res.status(503).json({ error: "Servidor indisponível: Conexão DB pendente" });
-  
+
   try {
     const { name, email, message } = req.body;
     if (!name || !email) {
@@ -76,7 +68,6 @@ app.post("/api/leads", async (req, res) => {
 
 // Rota para salvar quiz
 app.post("/api/quiz", async (req, res) => {
-  // Use a pool global
   if (!pool) return res.status(503).json({ error: "Servidor indisponível: Conexão DB pendente" });
 
   try {
@@ -108,33 +99,45 @@ app.post("/api/quiz", async (req, res) => {
 });
 
 // Fallback final
-app.use((req, res) => {
+app.use((_req, res) => {
   res.status(404).send("404: Endpoint da API não encontrado.");
 });
 
-
 // =======================================================
-// ** INICIALIZAÇÃO SÍNCRONA E CONEXÃO DB EM BACKGROUND **
+// ** INICIALIZAÇÃO E CONEXÃO DB AO INICIAR O SERVIDOR **
 // =======================================================
-const PORT = process.env.PORT || 80; // <<< NOVO VALOR AQUI
+const PORT = process.env.PORT || 3000;
 
+async function start() {
+  try {
+    // Conecta ao DB primeiro (se possível) para falhar rápido em caso de problema de credenciais
+    if (dbConfig) {
+      const dbPool = new Pool(dbConfig);
+      await dbPool.query('SELECT 1');
+      pool = dbPool;
+      console.log("✅ CONEXÃO COM O BANCO DE DADOS BEM-SUCEDIDA!");
+    } else {
+      console.warn("⚠️ DATABASE_URL não definida. Rotas que usam DB irão retornar 503.");
+    }
+  } catch (err) {
+    console.error("❌ ERRO CRÍTICO: FALHA AO CONECTAR AO DB!", err && err.message ? err.message : err);
+    // Não encerra: deixamos o servidor subir para que logs/info fiquem acessíveis.
+  }
 
-// Inicia o servidor Express de forma síncrona
-app.listen(PORT, async () => {
+  app.listen(PORT, () => {
     console.log("-----------------------------------------");
     console.log(`✅ Servidor Express rodando na porta ${PORT}`);
-    
-    // Tenta conectar ao DB em background APÓS o servidor iniciar
-    try {
-        const dbPool = new Pool(dbConfig);
-        await dbPool.query('SELECT 1');
-        
-        pool = dbPool; // Atribui a pool global SÓ APÓS o sucesso
-        console.log("✅ CONEXÃO COM O BANCO DE DADOS BEM-SUCEDIDA!");
-        
-    } catch (err) {
-        console.error("❌ ERRO CRÍTICO: FALHA AO CONECTAR AO DB!");
-        console.error("ERRO COMPLETO:", err.message);
-    }
     console.log("-----------------------------------------");
+  });
+}
+
+// Captura rejeições não tratadas para log
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
 });
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+start();
