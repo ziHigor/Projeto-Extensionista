@@ -116,7 +116,7 @@ app.use((req, res) => {
 // =======================================================
 // ** INICIALIZAÇÃO SÍNCRONA E CONEXÃO DB EM BACKGROUND **
 // =======================================================
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT;
 
 // Inicia o servidor Express de forma síncrona
 app.listen(PORT, async () => {
