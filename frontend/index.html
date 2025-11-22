@@ -2114,30 +2114,65 @@ updateDisplay();
             const ctx = canvas.getContext('2d');
             let width = canvas.width = window.innerWidth;
             let height = canvas.height = window.innerHeight;
-            const cols = Math.floor(width / 14);
-            const drops = new Array(cols).fill(1);
+            const cellW = 14;
+            let cols = Math.max(1, Math.floor(width / cellW));
+            let drops = new Array(cols).fill(1).map(() => Math.floor(Math.random() * (height / cellW)) || 1);
+            let rafId = null;
+
+            function createDrops() {
+                cols = Math.max(1, Math.floor(width / cellW));
+                drops = new Array(cols).fill(1).map(() => Math.floor(Math.random() * (height / cellW)) || 1);
+            }
+
             function resize() {
                 width = canvas.width = window.innerWidth;
                 height = canvas.height = window.innerHeight;
+
+                // Se em mobile, parar a animação e esconder canvas
+                if (window.innerWidth <= 768) {
+                    canvas.style.display = 'none';
+                    if (rafId) cancelAnimationFrame(rafId);
+                    rafId = null;
+                    return;
+                } else {
+                    canvas.style.display = '';
+                }
+
+                createDrops();
             }
+
             window.addEventListener('resize', resize);
+
             function draw() {
+                if (!ctx) return;
+
                 ctx.fillStyle = 'rgba(10,10,10,0.12)';
                 ctx.fillRect(0, 0, width, height);
                 ctx.fillStyle = 'rgba(0,255,157,0.8)';
                 ctx.font = '14px Courier New';
-                for (let i = 0; i < drops.length; i++) {
-                    const text = Math.floor(Math.random() * 2);
-                    const x = i * 14;
-                    const y = drops[i] * 14;
-                    ctx.fillText(String(text), x, y);
-                    if (y > height && Math.random() > 0.975) drops[i] = 0;
 
+                for (let i = 0; i < drops.length; i++) {
+                    // Garantia: se por algum motivo drops[i] for undefined, começa em 1
+                    if (typeof drops[i] !== 'number') drops[i] = 1;
+
+                    const text = Math.floor(Math.random() * 2);
+                    const x = i * cellW;
+                    const y = drops[i] * cellW;
+                    ctx.fillText(String(text), x, y);
+
+                    if (y > height && Math.random() > 0.975) drops[i] = 0;
                     drops[i]++;
                 }
-                requestAnimationFrame(draw);
+
+                rafId = requestAnimationFrame(draw);
             }
-            if (window.innerWidth <= 768) { canvas.style.display = 'none'; return; }
+
+            // Não iniciar em telas pequenas
+            if (window.innerWidth <= 768) {
+                canvas.style.display = 'none';
+                return;
+            }
+
             draw();
         })();
 
