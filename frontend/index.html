@@ -1750,22 +1750,27 @@
         // Remove qualquer caractere inesperado (whitelist)
         expr = expr.replace(/[^\d+\-*/().\s]/g, '');
 
+        // Remove operadores/dots finais (ex: "5+","3.") e espaços finais
+        expr = expr.replace(/[+\-*/.\s]+$/g, '');
+
         // Não permitir operadores iniciais indesejados (mas mantém '-' para números negativos)
         expr = expr.replace(/^[+*/]+/, '');
 
-        // Remove operadores/dots finais (ex: "5+","3.")
-        expr = expr.replace(/[+\-*/.\s]+$/g, '');
-
-        // Se ficou vazio -> zera
-        if (!expr) { displayValue = '0'; updateDisplay(); return; }
+        // Se não houver dígitos, zera o visor
+        if (!/[0-9]/.test(expr)) { displayValue = '0'; updateDisplay(); return; }
 
         // Balanceia parênteses automaticamente (fecha os que faltam)
         const opens = (expr.match(/\(/g) || []).length;
         const closes = (expr.match(/\)/g) || []).length;
         if (opens > closes) expr += ')'.repeat(opens - closes);
 
+        // Debug: log do que será avaliado
+        console.debug('calculate -> expr:', expr);
+
         // Avalia de forma controlada
         const result = Function('"use strict";return (' + expr + ')')();
+
+        console.debug('calculate -> result:', result);
 
         if (typeof result === 'number' && Number.isFinite(result)) {
             // Evita excesso de casas decimais
@@ -2022,6 +2027,9 @@ updateDisplay();
                 const operators = '+-*/';
                 const lastChar = displayValue.slice(-1);
 
+                // Se estava em estado de erro, reinicia ao digitar algo
+                if (displayValue === 'Erro') displayValue = '0';
+
                 if (value === '×') value = '*';
                 if (operators.includes(value) && operators.includes(lastChar)) {
                     displayValue = displayValue.slice(0, -1) + value;
@@ -2052,22 +2060,27 @@ updateDisplay();
                     // Remove qualquer caractere inesperado (whitelist)
                     expr = expr.replace(/[^\d+\-*/().\s]/g, '');
 
+                    // Remove operadores/dots finais (ex: "5+","3.") e espaços finais
+                    expr = expr.replace(/[+\-*/.\s]+$/g, '');
+
                     // Não permitir operadores iniciais indesejados (mas mantém '-' para números negativos)
                     expr = expr.replace(/^[+*/]+/, '');
 
-                    // Remove operadores/dots finais (ex: "5+","3.")
-                    expr = expr.replace(/[+\-*/.\s]+$/g, '');
-
-                    // Se ficou vazio -> zera
-                    if (!expr) { displayValue = '0'; updateDisplay(); return; }
+                    // Se não houver dígitos, zera o visor
+                    if (!/[0-9]/.test(expr)) { displayValue = '0'; updateDisplay(); return; }
 
                     // Balanceia parênteses automaticamente (fecha os que faltam)
                     const opens = (expr.match(/\(/g) || []).length;
                     const closes = (expr.match(/\)/g) || []).length;
                     if (opens > closes) expr += ')'.repeat(opens - closes);
 
+                    // Debug: log do que será avaliado
+                    console.debug('calculate -> expr:', expr);
+
                     // Avalia de forma controlada
                     const result = Function('"use strict";return (' + expr + ')')();
+
+                    console.debug('calculate -> result:', result);
 
                     if (typeof result === 'number' && Number.isFinite(result)) {
                         // Evita excesso de casas decimais
