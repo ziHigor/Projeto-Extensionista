@@ -2160,6 +2160,22 @@ updateDisplay();
                 }
                 updateDisplay();
             }
+
+            // === ADICIONAR EVENT LISTENERS AQUI ===
+            if (buttons && buttons.length) {
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const v = this.getAttribute('data-value');
+                        if (!v) return;
+                        appendToDisplay(v);
+                    });
+                });
+            }
+            if (equalsBtn) equalsBtn.addEventListener('click', calculate);
+            if (clearBtn) clearBtn.addEventListener('click', clearDisplay);
+
+            // garante que o visor mostra o valor inicial
+            updateDisplay();
         })();
 
         // Matrix Canvas Effect
@@ -2520,7 +2536,7 @@ updateDisplay();
                                         <button id="closeQuizBtn" class="return-home-btn">Voltar para o site</button>
                                     </div>
                                 </div>`;
-                            
+                        
 
                             const opts = quizPage.querySelector(".quiz-options");
                             q.options.forEach(opt => {
