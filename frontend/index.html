@@ -1739,11 +1739,19 @@
 <span style="color:#bd00ff">// Realiza o cálculo da expressão</span>
 <span style="color:#00ff9d">function</span> calculate() {
     try {
-        // Normaliza possíveis símbolos visuais
-        let expr = displayValue.replace(/×/g, '*').replace(/÷/g, '/').trim();
+        // Normaliza símbolos visuais e vírgula decimal/menos Unicode
+        let expr = displayValue
+            .replace(/×/g, '*')
+            .replace(/÷/g, '/')
+            .replace(/,/g, '.')
+            .replace(/\u2212/g, '-') // sinal de menos Unicode para hyphen
+            .trim();
 
-        // Rejeita caracteres inesperados
-        if (!/^[0-9+\-*/().\s]+$/.test(expr)) throw new Error('invalid');
+        // Remove qualquer caractere inesperado (whitelist)
+        expr = expr.replace(/[^\d+\-*/().\s]/g, '');
+
+        // Não permitir operadores iniciais indesejados (mas mantém '-' para números negativos)
+        expr = expr.replace(/^[+*/]+/, '');
 
         // Remove operadores/dots finais (ex: "5+","3.")
         expr = expr.replace(/[+\-*/.\s]+$/g, '');
@@ -1763,9 +1771,11 @@
             // Evita excesso de casas decimais
             displayValue = String(Math.round((result + Number.EPSILON) * 1e12) / 1e12);
         } else {
+            console.error('calculate: resultado inválido', result, 'expr:', expr);
             displayValue = 'Erro';
         }
     } catch (e) {
+        console.error('calculate: erro ao avaliar expressão:', displayValue, e);
         displayValue = 'Erro';
     }
     updateDisplay();
@@ -2031,11 +2041,19 @@ updateDisplay();
 
             function calculate() {
                 try {
-                    // Normaliza possíveis símbolos visuais
-                    let expr = displayValue.replace(/×/g, '*').replace(/÷/g, '/').trim();
+                    // Normaliza símbolos visuais e vírgula decimal/menos Unicode
+                    let expr = displayValue
+                        .replace(/×/g, '*')
+                        .replace(/÷/g, '/')
+                        .replace(/,/g, '.')
+                        .replace(/\u2212/g, '-') // sinal de menos Unicode para hyphen
+                        .trim();
 
-                    // Rejeita caracteres inesperados
-                    if (!/^[0-9+\-*/().\s]+$/.test(expr)) throw new Error('invalid');
+                    // Remove qualquer caractere inesperado (whitelist)
+                    expr = expr.replace(/[^\d+\-*/().\s]/g, '');
+
+                    // Não permitir operadores iniciais indesejados (mas mantém '-' para números negativos)
+                    expr = expr.replace(/^[+*/]+/, '');
 
                     // Remove operadores/dots finais (ex: "5+","3.")
                     expr = expr.replace(/[+\-*/.\s]+$/g, '');
@@ -2055,9 +2073,11 @@ updateDisplay();
                         // Evita excesso de casas decimais
                         displayValue = String(Math.round((result + Number.EPSILON) * 1e12) / 1e12);
                     } else {
+                        console.error('calculate: resultado inválido', result, 'expr:', expr);
                         displayValue = 'Erro';
                     }
                 } catch (e) {
+                    console.error('calculate: erro ao avaliar expressão:', displayValue, e);
                     displayValue = 'Erro';
                 }
                 updateDisplay();
