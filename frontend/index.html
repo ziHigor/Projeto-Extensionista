@@ -1738,49 +1738,17 @@
 
 <span style="color:#bd00ff">// Realiza o cálculo da expressão</span>
 <span style="color:#00ff9d">function</span> calculate() {
-    try {
-        // Normaliza símbolos visuais e vírgula decimal/menos Unicode
-        let expr = displayValue
-            .replace(/×/g, '*')
-            .replace(/÷/g, '/')
-            .replace(/,/g, '.')
-            .replace(/\u2212/g, '-') // sinal de menos Unicode para hyphen
-            .trim();
-
-        // Remove qualquer caractere inesperado (whitelist)
-        expr = expr.replace(/[^\d+\-*/().\s]/g, '');
-
-        // Remove operadores/dots finais (ex: "5+","3.") e espaços finais
-        expr = expr.replace(/[+\-*/.\s]+$/g, '');
-
-        // Não permitir operadores iniciais indesejados (mas mantém '-' para números negativos)
-        expr = expr.replace(/^[+*/]+/, '');
-
-        // Se não houver dígitos, zera o visor
-        if (!/[0-9]/.test(expr)) { displayValue = '0'; updateDisplay(); return; }
-
-        // Balanceia parênteses automaticamente (fecha os que faltam)
-        const opens = (expr.match(/\(/g) || []).length;
-        const closes = (expr.match(/\)/g) || []).length;
-        if (opens > closes) expr += ')'.repeat(opens - closes);
-
-        // Debug: log do que será avaliado
-        console.debug('calculate -> expr:', expr);
-
-        // Avalia de forma controlada
-        const result = Function('"use strict";return (' + expr + ')')();
-
-        console.debug('calculate -> result:', result);
-
-        if (typeof result === 'number' && Number.isFinite(result)) {
-            // Evita excesso de casas decimais
-            displayValue = String(Math.round((result + Number.EPSILON) * 1e12) / 1e12);
-        } else {
-            console.error('calculate: resultado inválido', result, 'expr:', expr);
+    <span style="color:#00ff9d">try</span> {
+        <span style="color:#bd00ff">// Permite apenas números, operadores e parênteses</span>
+        <span style="color:#00ff9d">if</span> (/^[0-9+\-*/(). ]+$/.test(displayValue)) {
+            <span style="color:#bd00ff">// Avaliação segura</span>
+            <span style="color:#00d9ff">const result = Function('"use strict";return (' + displayValue + ')')();</span>
+            <span style="color:#00ff9d">if</span> (Number.isFinite(result)) displayValue = String(result);
+            <span style="color:#00ff9d">else</span> displayValue = 'Erro';
+        } <span style="color:#00ff9d">else</span> {
             displayValue = 'Erro';
         }
-    } catch (e) {
-        console.error('calculate: erro ao avaliar expressão:', displayValue, e);
+    } <span style="color:#00ff9d">catch</span> (e) {
         displayValue = 'Erro';
     }
     updateDisplay();
@@ -2027,9 +1995,6 @@ updateDisplay();
                 const operators = '+-*/';
                 const lastChar = displayValue.slice(-1);
 
-                // Se estava em estado de erro, reinicia ao digitar algo
-                if (displayValue === 'Erro') displayValue = '0';
-
                 if (value === '×') value = '*';
                 if (operators.includes(value) && operators.includes(lastChar)) {
                     displayValue = displayValue.slice(0, -1) + value;
@@ -2195,7 +2160,386 @@ updateDisplay();
                 }
                 updateDisplay();
             }
+        })();
+
+        // Matrix Canvas Effect
+        (function initMatrixCanvas() {
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+            const cols = Math.floor(width / 14);
+            const drops = new Array(cols).fill(1);
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            function draw() {
+                ctx.fillStyle = 'rgba(10,10,10,0.12)';
+                ctx.fillRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(0,255,157,0.8)';
+                ctx.font = '14px Courier New';
+                for (let i = 0; i < drops.length; i++) {
+                    const text = Math.floor(Math.random() * 2);
+                    const x = i * 14;
+                    const y = drops[i] * 14;
+                    ctx.fillText(String(text), x, y);
+                    if (y > height && Math.random() > 0.975) drops[i] = 0;
+
+                    drops[i]++;
+                }
+                requestAnimationFrame(draw);
+            }
+            if (window.innerWidth <= 768) { canvas.style.display = 'none'; return; }
+            draw();
+        })();
+
+        // Toast utility
+        function showToast(msg, duration = 3000) {
+            const t = document.getElementById('toast');
+            if (!t) return;
+            t.innerText = msg;
+            t.style.display = 'block';
+            t.setAttribute('aria-hidden', 'false');
+            setTimeout(() => { t.style.display = 'none'; t.setAttribute('aria-hidden', 'true'); }, duration);
+        }
+
+        // Business form submit (front-end only)
+          const businessForm = document.getElementById('businessForm');
+    if (businessForm) {
+        businessForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            try {
+                const res = await fetch('https://backend-production-f0759.up.railway.app/api/leads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, message })
+                });
+
+                if (res.ok) {
+                    alert('Contato salvo com sucesso!');
+                    businessForm.reset();
+                } else {
+                    alert('Erro ao enviar, tente novamente.');
+                }
+            } catch (err) {
+                alert('Erro de conexão com servidor.');
+            }
         });
+    }
+
+
+        // === Botão do Menu (abrir quiz pelo menu principal) ===
+        const menuQuizBtn = document.getElementById('menuQuizBtn');
+        if (menuQuizBtn) {
+            menuQuizBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const quizPromo = document.getElementById("quizBalloon");
+                const quizOverlay = document.getElementById("quizOverlay");
+                const quizPage = document.querySelector(".quiz-page");
+
+                if (quizPromo) quizPromo.style.display = "none";
+                if (quizOverlay) quizOverlay.style.display = "block";
+                if (quizPage) {
+                    quizPage.style.display = "block";
+                    // Reinicia quiz ao abrir pelo menu
+                    currentQuestion = 0;
+                    score = 0;
+                    answers = [];
+                    // Modifique a função renderQuestion aqui
+                    function renderQuestion() {
+                        const q = quizData[currentQuestion];
+                        quizPage.innerHTML = `
+                            <div class="quiz-card">
+                                <div class="quiz-question">${q.question}</div>
+                                <div class="quiz-options"></div>
+                                <div style="text-align:center; margin-top:20px;">
+                                    <button id="closeQuizBtn" class="return-home-btn">Voltar para o site</button>
+                                </div>
+                            </div>`;
+                        
+                        const opts = quizPage.querySelector(".quiz-options");
+                        q.options.forEach(opt => {
+                            const btn = document.createElement("button");
+                            btn.textContent = opt.text;
+                            btn.onclick = () => onOptionClick(q, opt);
+                            opts.appendChild(btn);
+                        });
+
+                        // Adicionar evento ao botão voltar
+                        document.getElementById("closeQuizBtn").onclick = closeQuizToSite;
+                    }
+                    renderQuestion();
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // === Quiz principal ===
+        (function () {
+            // TODAS AS PERGUNTAS DO QUIZ
+            const quizData = [
+                {
+                    question: "O que significa 'Wi-Fi'?", options: [
+                        { text: "Um tipo de café", correct: false },
+                        { text: "Uma conexão sem fio com a internet", correct: true },
+                        { text: "Um jogo online", correct: false }
+                    ]
+                },
+                {
+                    question: "Onde ficam armazenadas as fotos que você tira no celular?", options: [
+                        { text: "No bolso", correct: false },
+                        { text: "Na galeria ou na nuvem", correct: true },
+                        { text: "No carregador", correct: false }
+                    ]
+                },
+                {
+                    question: "O que é um 'sistema de informação'?", options: [
+                        { text: "Um programa de fofoca", correct: false },
+                        { text: "Um conjunto de pessoas e tecnologias que organizam dados", correct: true },
+                        { text: "Um aplicativo para pedir comida", correct: false }
+                    ]
+                },
+                {
+                    question: "Qual destes objetos NÃO é considerado tecnologia digital?", options: [
+                        { text: "Computador", correct: false },
+                        { text: "Calculadora", correct: false },
+                        { text: "Vassoura", correct: true }
+                    ]
+                },
+                {
+                    question: "Qual é a função principal do Google?", options: [
+                        { text: "Ajudar a encontrar informações", correct: true },
+                        { text: "Vender pizza", correct: false },
+                        { text: "Guardar brinquedos", correct: false }
+                    ]
+                },
+                {
+                    question: "O que significa 'app'?", options: [
+                        { text: "Um tipo de celular", correct: false },
+                        { text: "Abreviação de aplicativo", correct: true },
+                        { text: "Um desenho animado", correct: false }
+                    ]
+                },
+                {
+                    question: "Quando você envia uma mensagem no WhatsApp, o que acontece com ela?", options: [
+                        { text: "Vai direto para o espaço", correct: false },
+                        { text: "É transmitida pela internet", correct: true },
+                        { text: "Fica presa no celular", correct: false }
+                    ]
+                },
+                {
+                    question: "Qual destes é um exemplo de rede social?", options: [
+                        { text: "Facebook", correct: true },
+                        { text: "Word", correct: false },
+                        { text: "Calculadora", correct: false }
+                    ]
+                },
+                {
+                    question: "O que é 'nuvem' na tecnologia?", options: [
+                        { text: "O céu cheio de algodão", correct: false },
+                        { text: "Um lugar na internet para guardar arquivos", correct: true },
+                        { text: "Uma chuva de códigos", correct: false }
+                    ]
+                },
+                {
+                    question: "Qual destes é um sistema operacional de celular?", options: [
+                        { text: "Android", correct: true },
+                        { text: "WhatsApp", correct: false },
+                        { text: "TikTok", correct: false }
+                    ]
+                }
+            ];
+
+            let quizOverlay = document.getElementById("quizOverlay");
+            if (!quizOverlay) {
+                quizOverlay = document.createElement("div");
+                quizOverlay.id = "quizOverlay";
+                quizOverlay.style.position = "fixed";
+                quizOverlay.style.inset = "0";
+                quizOverlay.style.background = "rgba(0,0,0,0.6)";
+                quizOverlay.style.display = "none";
+                quizOverlay.style.zIndex = "1199";
+                document.body.appendChild(quizOverlay);
+            }
+
+            let quizPage = document.querySelector(".quiz-page");
+            if (!quizPage) {
+                quizPage = document.createElement("div");
+                quizPage.className = "quiz-page";
+                quizPage.style.display = "none";
+                quizPage.style.zIndex = "1200";
+                document.body.appendChild(quizPage);
+            }
+
+            const quizPromo = document.getElementById("quizBalloon");
+            const openQuizBtn = document.getElementById("openQuizBtn");
+            const deferQuizBtn = document.getElementById("deferQuizBtn");
+
+            // Variáveis globais
+            window.currentQuestion = 0;
+            window.score = 0;
+            window.answers = [];
+
+            // Função para reiniciar o quiz
+            function resetQuiz() {
+                window.currentQuestion = 0;
+                window.score = 0;
+                window.answers = [];
+                if (quizPage) quizPage.innerHTML = "";
+            }
+            window.resetQuiz = resetQuiz;
+
+            function renderQuestion() {
+                const q = quizData[window.currentQuestion];
+                quizPage.innerHTML = `
+      <div class="quiz-card">
+        <div class="quiz-question">${q.question}</div>
+        <div class="quiz-options"></div>
+      </div>`;
+                const opts = quizPage.querySelector(".quiz-options");
+                q.options.forEach(opt => {
+                    const btn = document.createElement("button");
+                    btn.textContent = opt.text;
+                    btn.onclick = () => onOptionClick(q, opt);
+                    opts.appendChild(btn);
+                });
+            }
+            window.renderQuestion = renderQuestion;
+
+            function onOptionClick(q, opt) {
+                window.answers.push({
+                    question: q.question,
+                    selected: opt.text,
+                    correct: q.options.find(o => o.correct).text,
+                    acertou: opt.correct
+                });
+                if (opt.correct) window.score++;
+                window.currentQuestion++;
+                if (window.currentQuestion < quizData.length) {
+                    renderQuestion();
+                } else {
+                    showResult();
+                }
+            }
+
+            function showResult() {
+                quizPage.innerHTML = `
+      <div class="quiz-card">
+        <div class="quiz-result">
+          🎉 Fim do Quiz!<br>
+          Você acertou <b>${window.score}</b> de <b>${quizData.length}</b> perguntas.
+        </div>
+        <button id="closeQuizBtn" class="return-home-btn">Voltar para o site</button>
+      </div>`;
+                document.getElementById("closeQuizBtn").onclick = closeQuizToSite;
+                const email = prompt("Digite seu e-mail para salvar seu resultado (opcional):");
+                salvarResultadoQuiz(email, window.score, quizData.length, window.answers);
+            }
+
+            function closeQuizToSite() {
+                quizPage.style.display = "none";
+                quizOverlay.style.display = "none";
+                quizPage.innerHTML = ""; // 🔥 limpa o conteúdo ao fechar
+                const quizPromo = document.getElementById("quizBalloon");
+                if (quizPromo) quizPromo.style.display = "none";
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+          async function salvarResultadoQuiz(user_email, score, total, answers) {
+        try {
+            const res = await fetch("https://backend-production-f0759.up.railway.app/api/quiz", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_email, score, total, answers })
+            });
+
+            if (res.ok) {
+                console.log("Resultado salvo!");
+            } else {
+                console.error("Erro ao salvar resultado do quiz:", await res.text());
+            }
+
+        } catch (e) {
+            console.error("Erro ao salvar quiz:", e);
+        }
+    }
+
+            // Botão COMEÇAR
+            if (openQuizBtn) {
+                openQuizBtn.onclick = () => {
+                    if (typeof window.resetQuiz === "function") window.resetQuiz();
+                    if (quizPromo) quizPromo.style.display = "none";
+                    quizOverlay.style.display = "block";
+                    quizPage.style.display = "block";
+                    window.renderQuestion();
+                };
+            }
+
+            // Botão "Responder mais tarde"
+            if (deferQuizBtn) {
+                deferQuizBtn.onclick = () => {
+                    if (quizPromo) quizPromo.style.display = "none";
+                    quizOverlay.style.display = "none";
+                    if (typeof window.resetQuiz === "function") window.resetQuiz();
+                };
+            }
+
+            // Botão do Menu (abrir quiz pelo menu principal)
+            const menuQuizBtn = document.getElementById('menuQuizBtn');
+            if (menuQuizBtn) {
+                menuQuizBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const quizPromo = document.getElementById("quizBalloon");
+                    const quizOverlay = document.getElementById("quizOverlay");
+                    const quizPage = document.querySelector(".quiz-page");
+
+                    if (quizPromo) quizPromo.style.display = "none";
+                    if (quizOverlay) quizOverlay.style.display = "block";
+                    if (quizPage) {
+                        quizPage.style.display = "block";
+                        // Reinicia quiz ao abrir pelo menu
+                        currentQuestion = 0;
+                        score = 0;
+                        answers = [];
+                        // Modifique a função renderQuestion aqui
+                        function renderQuestion() {
+                            const q = quizData[currentQuestion];
+                            quizPage.innerHTML = `
+                                <div class="quiz-card">
+                                    <div class="quiz-question">${q.question}</div>
+                                    <div class="quiz-options"></div>
+                                    <div style="text-align:center; margin-top:20px;">
+                                        <button id="closeQuizBtn" class="return-home-btn">Voltar para o site</button>
+                                    </div>
+                                </div>`;
+                            
+
+                            const opts = quizPage.querySelector(".quiz-options");
+                            q.options.forEach(opt => {
+                                const btn = document.createElement("button");
+                                btn.textContent = opt.text;
+                                btn.onclick = () => onOptionClick(q, opt);
+                                opts.appendChild(btn);
+                            });
+
+                            // Adicionar evento ao botão voltar
+                            document.getElementById("closeQuizBtn").onclick = closeQuizToSite;
+                        }
+                        renderQuestion();
+                    }
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+        })();
+
 
         // INTERATIVIDADE: Galeria de vídeos (Entrevistas)
         document.querySelectorAll('.video-card').forEach(card => {
