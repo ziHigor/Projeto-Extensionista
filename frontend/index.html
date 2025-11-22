@@ -1267,109 +1267,6 @@
             border-radius: 10px;
             box-shadow: 0 2px 8px #0002;
         }
-
-        /* ==== Overrides mínimos para quiz e vídeos ==== */
-
-/* Força estilo específico no elemento do balão do quiz */
-#quizBalloon {
-  inset: auto !important;              /* cancela inset full-screen */
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  width: min(86vw, 520px) !important;
-  max-width: 520px !important;
-  max-height: 80vh !important;
-  height: auto !important;
-  padding: 1rem !important;
-  border-radius: 14px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-shadow: 0 18px 60px rgba(0,0,0,0.6), 0 8px 40px rgba(0,255,157,0.08) !important;
-  background-size: auto !important;
-  /* remove inset overlay applied por regra anterior */
-  box-shadow: 0 10px 40px rgba(0,255,157,0.12) !important;
-  overflow: hidden;
-}
-
-/* conteúdo interno do balão com scroll se necessário */
-#quizBalloon .promo-text {
-  padding: 18px 16px !important;
-  max-width: 100% !important;
-  max-height: calc(80vh - 160px) !important;
-  overflow: auto !important;
-}
-
-/* reduzir ícone/título/descrição/ctas para caber melhor */
-#quizBalloon .promo-icon { font-size: 2.8rem !important; margin-bottom: 14px !important; }
-#quizBalloon .promo-text .title { font-size: clamp(1.05rem, 2.8vw, 1.6rem) !important; line-height:1.08; padding-bottom:6px !important; }
-#quizBalloon .promo-text .subtitle { font-size: clamp(0.95rem, 2.2vw, 1rem) !important; line-height:1.45 !important; }
-#quizBalloon .promo-cta { gap: 12px !important; margin-top: 12px !important; }
-
-/* botoes do balão menores */
-#quizBalloon .promo-cta .cyber-btn { padding: 10px 18px !important; font-size: 0.98rem !important; border-radius:10px !important; }
-
-/* garantir que overlay controle escurecimento separado (já existe #quizOverlay) */
-#quizOverlay { display: none; } /* JS controla quando exibir */
-
-/* Ajustes finos para mobile: ocupa menos altura, scroll interno */
-@media (max-width: 700px) {
-  #quizBalloon {
-    width: 92vw !important;
-    padding: 0.8rem !important;
-    max-height: 78vh !important;
-  }
-  #quizBalloon .promo-text { padding: 12px !important; max-height: calc(78vh - 120px) !important; }
-  #quizBalloon .promo-icon { font-size: 2.2rem !important; }
-  #quizBalloon .promo-text .title { font-size: 1.05rem !important; }
-  #quizBalloon .promo-text .subtitle { font-size: 0.95rem !important; }
-}
-
-/* ==== Vídeos: grid responsivo estável ==== */
-.videos-grid {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
-  gap: 1.25rem !important;
-  align-items: start !important;
-  justify-items: center !important;
-}
-
-/* cada card ocupa seu espaço e não estoura */
-.video-card {
-  width: 100% !important;
-  max-width: 520px !important;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-/* players com aspect-ratio consistente */
-.video-card video {
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 16/9 !important;
-  max-height: 420px !important;
-  object-fit: cover !important;
-  border-radius: 10px !important;
-}
-
-/* títulos dos vídeos não sobreporem (centralizados) */
-.video-card h3 {
-  font-size: 1.05rem;
-  text-align: center;
-  margin: 0 0 6px 0;
-}
-
-/* mobile: reduzir altura máxima do player */
-@media (max-width: 700px) {
-  .video-card { max-width: 100% !important; }
-  .video-card video { max-height: 280px !important; aspect-ratio: 16/9; }
-}
-
-/* pequenas garantias para evitar overflow geral */
-body, html { max-width: 100%; overflow-x: hidden; }
     </style>
 </head>
 
@@ -1809,7 +1706,6 @@ body, html { max-width: 100%; overflow-x: hidden; }
 
 <span style="color:#bd00ff">// Adiciona número ou operador ao visor</span>
 <span style="color:#00ff9d">function</span> appendToDisplay(value) {
-   
     <span style="color:#00d9ff">const operators = '+-*/';</span>
     <span style="color:#00d9ff">const lastChar = displayValue.slice(-1);</span>
 
@@ -2116,169 +2012,42 @@ updateDisplay();
 
             function clearDisplay() { displayValue = '0'; updateDisplay(); }
 
-            // Função auxiliar: avalia expressão aritmética segura (sem eval/new Function)
-            function safeEvalExpression(expr) {
-                // tokens: números (decimais), operadores + - * /, parênteses
-                const tokens = [];
-                const chars = expr.replace(/\s+/g, '');
-                let i = 0;
-                const isDigit = ch => /\d/.test(ch);
-                while (i < chars.length) {
-                    const ch = chars[i];
-                    if (isDigit(ch) || ch === '.') {
-                        let num = ch;
-                        i++;
-                        while (i < chars.length && (isDigit(chars[i]) || chars[i] === '.')) {
-                            num += chars[i++];
-                        }
-                        if (num === '.' || (num.match(/\./g) || []).length > 1) throw new Error('Número inválido');
-                        tokens.push(num);
-                        continue;
-                    }
-                    if (ch === '+' || ch === '*' || ch === '/' ) {
-                        tokens.push(ch);
-                        i++;
-                        continue;
-                    }
-                    if (ch === '-') {
-                        // Detecta sinal unário: se começo ou após '(' ou outro operador
-                        const prev = tokens.length ? tokens[tokens.length - 1] : null;
-                        if (prev === null || prev === '(' || ['+','-','*','/'].includes(prev)) {
-                            // transformar unário em (0 - ...)
-                            tokens.push('0');
-                        }
-                        tokens.push('-');
-                        i++;
-                        continue;
-                    }
-                    if (ch === '(' || ch === ')') {
-                        tokens.push(ch);
-                        i++;
-                        continue;
-                    }
-                    // caractere inválido
-                    throw new Error('caractere inválido');
-                }
-
-                // Shunting-yard para RPN
-                const out = [];
-                const ops = [];
-                const prec = { '+': 1, '-': 1, '*': 2, '/': 2 };
-                const isOp = t => ['+','-','*','/'].includes(t);
-
-                for (const tok of tokens) {
-                    if (!isNaN(Number(tok))) {
-                        out.push(tok);
-                    } else if (isOp(tok)) {
-                        while (ops.length && isOp(ops[ops.length -1]) &&
-                               ((prec[ops[ops.length -1]] > prec[tok]) || (prec[ops[ops.length -1]] === prec[tok])) ) {
-                            out.push(ops.pop());
-                        }
-                        ops.push(tok);
-                    } else if (tok === '(') {
-                        ops.push(tok);
-                    } else if (tok === ')') {
-                        while (ops.length && ops[ops.length -1] !== '(') out.push(ops.pop());
-                        if (!ops.length || ops[ops.length -1] !== '(') throw new Error('Parênteses não balanceados');
-                        ops.pop(); // remove '('
-                    } else {
-                        throw new Error('Token inválido');
-                    }
-                }
-                while (ops.length) {
-                    const o = ops.pop();
-                    if (o === '(' || o === ')') throw new Error('Parênteses não balanceados');
-                    out.push(o);
-                }
-
-                // Avalia RPN
-                const stack = [];
-                for (const t of out) {
-                    if (!isNaN(Number(t))) {
-                        stack.push(Number(t));
-                    } else if (isOp(t)) {
-                        if (stack.length < 2) throw new Error('Expressão inválida');
-                        const b = stack.pop();
-                        const a = stack.pop();
-                        let res;
-                        if (t === '+') res = a + b;
-                        else if (t === '-') res = a - b;
-                        else if (t === '*') res = a * b;
-                        else if (t === '/') {
-                            if (b === 0) throw new Error('Divisão por zero');
-                            res = a / b;
-                        }
-                        stack.push(res);
-                    } else {
-                        throw new Error('Erro na avaliação');
-                    }
-                }
-                if (stack.length !== 1) throw new Error('Expressão inválida');
-                return stack[0];
-            }
-
             function calculate() {
                 try {
-                    // Normaliza símbolos visuais e vírgula decimal/menos Unicode
-                    let expr = displayValue
-                        .replace(/×/g, '*')
-                        .replace(/÷/g, '/')
-                        .replace(/,/g, '.')
-                        .replace(/\u2212/g, '-') // sinal de menos Unicode para hyphen
-                        .trim();
-
-                    // Apenas caracteres permitidos
-                    if (!/^[0-9+\-*/().\s]*$/.test(expr)) {
-                        console.warn('calculate: caracteres inválidos em', expr);
-                        displayValue = 'Erro';
-                        updateDisplay();
-                        return;
-                    }
-
-                    // Remove operadores/dots finais (ex: "5+","3.") e espaços finais
-                    expr = expr.replace(/[+\-*/.\s]+$/g, '');
-
-                    if (!expr) { displayValue = '0'; updateDisplay(); return; }
-
-                    // Balanceia parênteses automaticamente
-                    const opens = (expr.match(/\(/g) || []).length;
-                    const closes = (expr.match(/\)/g) || []).length;
-                    if (opens > closes) expr += ')'.repeat(opens - closes);
-
-                    console.debug('calculate -> evaluating expr:', expr);
-
-                    // Avaliação segura (sem eval/new Function)
-                    const result = safeEvalExpression(expr);
-
-                    console.debug('calculate -> result:', result);
-
-                    if (typeof result === 'number' && Number.isFinite(result)) {
-                        displayValue = String(Math.round((result + Number.EPSILON) * 1e12) / 1e12);
+                    if (/^[0-9+\-*/(). ]+$/.test(displayValue)) {
+                        const result = Function('"use strict";return (' + displayValue + ')')();
+                        if (Number.isFinite(result)) displayValue = String(result);
+                        else displayValue = 'Erro';
                     } else {
-                        console.error('calculate: resultado inválido', result);
                         displayValue = 'Erro';
                     }
                 } catch (e) {
-                    console.error('calculate: erro ao avaliar expressão:', e && e.message ? e.message : e);
                     displayValue = 'Erro';
                 }
                 updateDisplay();
             }
 
-            // === ADICIONAR EVENT LISTENERS AQUI ===
-            if (buttons && buttons.length) {
-                buttons.forEach(btn => {
-                    btn.addEventListener('click', function () {
-                        const v = this.getAttribute('data-value');
-                        if (!v) return;
-                        appendToDisplay(v);
-                    });
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const v = btn.getAttribute('data-value');
+                    appendToDisplay(v);
                 });
-            }
+            });
             if (equalsBtn) equalsBtn.addEventListener('click', calculate);
             if (clearBtn) clearBtn.addEventListener('click', clearDisplay);
 
-            // garante que o visor mostra o valor inicial
+            window.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                if (e.key >= '0' && e.key <= '9') appendToDisplay(e.key);
+                if (['+', '-', '*', '/', '(', ')', '.'].includes(e.key)) appendToDisplay(e.key);
+                if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calculate(); }
+                if (e.key === 'Backspace') {
+                    if (displayValue.length > 1) displayValue = displayValue.slice(0, -1);
+                    else displayValue = '0';
+                    updateDisplay();
+                }
+            });
+
             updateDisplay();
         })();
 
@@ -2640,7 +2409,7 @@ updateDisplay();
                                         <button id="closeQuizBtn" class="return-home-btn">Voltar para o site</button>
                                     </div>
                                 </div>`;
-                        
+                            
 
                             const opts = quizPage.querySelector(".quiz-options");
                             q.options.forEach(opt => {
